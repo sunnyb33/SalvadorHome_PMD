@@ -1,4 +1,4 @@
-package com.example.salvadorhome.ui.theme
+package com.example.salvadorhome.core.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
