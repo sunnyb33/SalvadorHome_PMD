@@ -1,5 +1,6 @@
 package com.example.salvadorhome.features.auth.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,6 +25,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
 
 @Composable
 fun LoginScreen(
@@ -42,11 +45,13 @@ fun LoginScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 32.dp, vertical = 48.dp)
+            .background(Color(0xFFF8F9FA))
     ) {
         Text(
             text = "Bienvenido de nuevo",
             fontSize = 22.sp,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            fontFamily = FontFamily.SansSerif
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -70,7 +75,11 @@ fun LoginScreen(
 
         //Esto es opcional para no complicar el backend al momento de recuperar la contraseña
         TextButton(onClick = onForgotPassword) {
-            Text("¿Has olvidado tu contraseña?")
+            Text(
+                text = "¿Has olvidado tu contraseña?",
+                fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily.SansSerif
+            )
         }
 
         Spacer(modifier = Modifier.weight(1f))
