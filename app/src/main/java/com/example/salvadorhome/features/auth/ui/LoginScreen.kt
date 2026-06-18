@@ -2,6 +2,7 @@ package com.example.salvadorhome.features.auth.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,9 +11,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -26,14 +30,24 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.tooling.preview.Preview
 
+@Preview(showBackground = true) //Previsualizacion previa
 @Composable
 fun LoginScreen(
-    onLoginSucces: () -> Unit,
-    onForgotPassword: () -> Unit,
+    onLoginSucces: () -> Unit = {},
+    onForgotPassword: () -> Unit = {},
     viewModel: AuthViewModel = viewModel()
 ){
+    //Colores
+    val TextColor = Color(0xFF0A1128)
+    val MainColor = Color(0xFF0A1128)
+    val ButtonTextColor = Color(0xFFF5F5F5)
+    val PlaceholderColor = Color(0xFFAAB2CB)
+
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     //val state by viewModel.uiState.collectAsState()
@@ -51,7 +65,8 @@ fun LoginScreen(
             text = "Bienvenido de nuevo",
             fontSize = 22.sp,
             fontWeight = FontWeight.Bold,
-            fontFamily = FontFamily.SansSerif
+            fontFamily = FontFamily.SansSerif,
+            color = MainColor,
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -64,10 +79,53 @@ fun LoginScreen(
         OutlinedTextField(
             value = email,
             onValueChange = { email = it } ,
-            label = { Text("Email") },
-            placeholder = {Text("ejemplo@email.com")},
+            label = { Text(
+                text = "Email",
+                color = TextColor
+            )},
+            placeholder = {Text(
+                text = "ejemplo@email.com",
+                color = PlaceholderColor
+            )},
+            colors = TextFieldDefaults.colors(
+                unfocusedTextColor = Color(0xFFA1B2E8),
+                focusedIndicatorColor = Color(0xFFEBEEFA),
+                focusedTextColor = TextColor
+            ),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp),
+            singleLine = true
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        //Contraseña
+        OutlinedTextField(
+            value = password, //Temporal
+            onValueChange = {password = it}, // Temporal
+            label = {
+                Text(
+                    text = "Contraseña",
+                    color = TextColor
+                )
+            },
+            placeholder = {
+                Text(
+                    text = "Ingresa tu contaseña",
+                    color = PlaceholderColor
+                )
+            },
+            colors = TextFieldDefaults.colors(
+                unfocusedTextColor = Color(0xFFB5D3E0),
+                focusedIndicatorColor = Color(0xFFB5D3E0),
+                focusedTextColor = TextColor
+        ),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp),
             singleLine = true
         )
 
@@ -78,16 +136,19 @@ fun LoginScreen(
             Text(
                 text = "¿Has olvidado tu contraseña?",
                 fontWeight = FontWeight.Bold,
-                fontFamily = FontFamily.SansSerif
+                fontFamily = FontFamily.SansSerif,
+                color = TextColor
             )
         }
 
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.weight(0.1f))
 
         Button(
             onClick = {/*viewModel.login(onLoginSucces)*/}, //Se añadira cuando la logica sea implementada
             //enabled = !state.isLoading,
             shape = RoundedCornerShape(8.dp),
+            contentPadding = PaddingValues(vertical = 4.dp, horizontal = 80.dp),
+            colors = ButtonDefaults.outlinedButtonColors(MainColor),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp)
@@ -97,6 +158,11 @@ fun LoginScreen(
             } else {
                 Text("Confirmar")
             }*/
+            Text(
+                text = "Confirmar",
+                fontSize = 18.sp,
+                color = ButtonTextColor
+            )
         }
 
             Spacer(modifier = Modifier.height(12.dp))
