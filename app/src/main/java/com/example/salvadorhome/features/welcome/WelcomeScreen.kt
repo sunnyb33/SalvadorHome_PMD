@@ -43,7 +43,7 @@ fun WelcomeScreen(
 
         Text(
             text = "Bienvenido a SalvadorHouse",
-            fonSize = 22.sp,
+            fontSize = 22.sp,
             fontWeight = FontWeight.Bold,
             fontFamily = FontFamily.SansSerif
         )
