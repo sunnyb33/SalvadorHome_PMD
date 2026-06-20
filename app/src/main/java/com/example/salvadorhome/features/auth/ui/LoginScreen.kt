@@ -15,11 +15,9 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.salvadorhome.features.auth.viewmodel.AuthViewModel
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -30,17 +28,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Outline
-import androidx.compose.ui.text.Placeholder
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Preview(showBackground = true) //Previsualizacion previa
 @Composable
 fun LoginScreen(
     onLoginSucces: () -> Unit = {},
     onForgotPassword: () -> Unit = {},
-    viewModel: AuthViewModel = viewModel()
+    ViewModel: AuthViewModel = viewModel()
 ){
     //Colores
     val TextColor = Color(0xFF0A1128)
