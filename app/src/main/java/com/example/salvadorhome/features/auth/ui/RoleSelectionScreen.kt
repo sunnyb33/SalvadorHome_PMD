@@ -1,6 +1,7 @@
 package com.example.salvadorhome.features.auth.ui
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -48,6 +49,7 @@ private fun RoleOption(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
         modifier = Modifier
+            .background(Color(0xFFF8F9FA))
             .fillMaxWidth()
             .padding(vertical = 15.dp)
     ) {
