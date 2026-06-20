@@ -148,7 +148,7 @@ fun LoginScreen(
             //enabled = !state.isLoading,
             shape = RoundedCornerShape(8.dp),
             contentPadding = PaddingValues(vertical = 4.dp, horizontal = 80.dp),
-            colors = ButtonDefaults.outlinedButtonColors(MainColor),
+            colors = ButtonDefaults.buttonColors(MainColor),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp)
