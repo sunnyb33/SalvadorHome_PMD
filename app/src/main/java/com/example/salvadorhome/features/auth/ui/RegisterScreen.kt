@@ -100,6 +100,13 @@ fun RegisterScreen(
             singleLine = true
         )
 
+        Spacer(modifier = Modifier.height(20.dp))
+
+        OutlinedTextField(
+            value = password,
+            onValueChange = {password = it},
+        )
+
 
 
 
