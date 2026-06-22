@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Bed
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
@@ -37,8 +36,12 @@ import com.example.salvadorhome.features.host.ui.screens.HostingDetailScreen
 import com.example.salvadorhome.features.host.ui.screens.PublishHostingScreen
 import com.example.salvadorhome.features.shared.model.Hosting
 import com.example.salvadorhome.features.shared.model.SampleHostings
+import com.example.salvadorhome.features.shared.model.Conversation
+import com.example.salvadorhome.features.shared.model.SampleConversations
 import com.example.salvadorhome.features.shared.ui.components.SalvadorBottomBar
+import com.example.salvadorhome.features.shared.ui.screens.ChatScreen
 import com.example.salvadorhome.features.shared.ui.screens.ExploreScreen
+import com.example.salvadorhome.features.shared.ui.screens.MessagesScreen
 
 private enum class HostDestination { HOME, EXPLORE, MESSAGES, PUBLISH, BOOKINGS, PROFILE }
 
@@ -46,6 +49,7 @@ private enum class HostDestination { HOME, EXPLORE, MESSAGES, PUBLISH, BOOKINGS,
 fun HostApp() {
     var destination by remember { mutableStateOf(HostDestination.HOME) }
     var selectedHosting by remember { mutableStateOf<Hosting?>(null) }
+    var selectedConversation by remember { mutableStateOf<Conversation?>(null) }
     val hostings = remember { mutableStateListOf<Hosting>().apply { addAll(SampleHostings) } }
 
     Scaffold(
@@ -54,6 +58,7 @@ fun HostApp() {
                 selectedIndex = destination.ordinal,
                 onItemSelected = { index ->
                     selectedHosting = null
+                    selectedConversation = null
                     destination = HostDestination.entries[index]
                 }
             )
@@ -65,6 +70,12 @@ fun HostApp() {
                 hosting = detail,
                 onBack = { selectedHosting = null },
                 modifier = Modifier.padding(padding)
+            )
+        } else if (selectedConversation != null) {
+            ChatScreen(
+                conversation = selectedConversation!!,
+                modifier = Modifier.padding(padding),
+                onBack = { selectedConversation = null }
             )
         } else when (destination) {
             HostDestination.HOME -> HostDashboardScreen(
@@ -80,7 +91,12 @@ fun HostApp() {
                 hostings.add(0, Hosting(title, location, description, "Precio por definir", palette = listOf(Color(0xFFC2A5E7), Color(0xFF665089))))
                 destination = HostDestination.HOME
             }
-            HostDestination.MESSAGES -> EmptySection("Mensajes", "Aquí aparecerán tus conversaciones con huéspedes.", Icons.AutoMirrored.Filled.Send, Modifier.padding(padding))
+            HostDestination.MESSAGES -> MessagesScreen(
+                conversations = SampleConversations,
+                modifier = Modifier.padding(padding),
+                onBack = { destination = HostDestination.HOME },
+                onConversationClick = { selectedConversation = it }
+            )
             HostDestination.BOOKINGS -> EmptySection("Reservas", "Administra las solicitudes y próximas estadías.", Icons.Default.Bed, Modifier.padding(padding))
             HostDestination.PROFILE -> EmptySection("Perfil", "Configura tu cuenta y la información de anfitrión.", Icons.Default.Person, Modifier.padding(padding))
         }
