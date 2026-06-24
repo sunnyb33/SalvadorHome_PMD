@@ -21,6 +21,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,26 +38,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.salvadorhome.features.auth.viewmodel.AuthViewModel
-
-@Preview(showBackground = true) //Previsualizacion previa
 @Composable
 fun RegisterScreen(
-    //onRegisterSuccess: () -> Unit,
-    //viewModel: AuthViewModel = viewModel()
-){
-
-    //Colores:
+    viewModel: AuthViewModel,
+    onRegisterSuccess: () -> Unit = {}
+) {
     val TextColor = Color(0xFF0A1128)
     val MainColor = Color(0xFF0A1128)
-    val ButtonTextColor = Color(0xFFF5F5F5)
-    val CheckedColor = Color(0xFF3357CC)
 
-    //val state by viewModel.uiState.collectAsState()
-    var nombre by remember { mutableStateOf("") } //Temporal
-    var apellido by remember { mutableStateOf("") } //Temporal
-    var password by remember { mutableStateOf("") } //Temporal
-    var Confirmpassword by remember { mutableStateOf("") }//Temporal
-    var email by remember { mutableStateOf("") }
+    val state by viewModel.uiState.collectAsState()
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -77,19 +67,11 @@ fun RegisterScreen(
 
         Spacer(modifier = Modifier.height(45.dp))
 
-        /*
-        * Modificar value y value on change ya que no tienen logica
-        * estan descritos de esta manera solo para mostrarse, se modificara cuando
-        * la logica del viewmodel este realizada
-        * value = state.nombre,
-        * onValueChange = viewModel::onNombreChange,
-        * */
-
         OutlinedTextField(
-            value = nombre,
-            onValueChange = { nombre = it },
-            label = {Text("Nombre", fontFamily = FontFamily.SansSerif)},
-            placeholder = {Text("Nombre", fontFamily = FontFamily.SansSerif)},
+            value = state.nombre,
+            onValueChange = viewModel::onNombreChange,
+            label = { Text("Nombre", fontFamily = FontFamily.SansSerif) },
+            placeholder = { Text("Nombre", fontFamily = FontFamily.SansSerif) },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
         )
@@ -97,10 +79,10 @@ fun RegisterScreen(
         Spacer(modifier = Modifier.height(20.dp))
 
         OutlinedTextField(
-            value = apellido,
-            onValueChange = { apellido = it },
-            label = {Text("Apellido", fontFamily = FontFamily.SansSerif)},
-            placeholder = {Text("Apellido", fontFamily = FontFamily.SansSerif)},
+            value = state.apellido,
+            onValueChange = viewModel::onApellidoChange,
+            label = { Text("Apellido", fontFamily = FontFamily.SansSerif) },
+            placeholder = { Text("Apellido", fontFamily = FontFamily.SansSerif) },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
         )
@@ -108,8 +90,8 @@ fun RegisterScreen(
         Spacer(modifier = Modifier.height(20.dp))
 
         OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
+            value = state.email,
+            onValueChange = viewModel::onEmailChange,
             label = { Text("Correo electrónico", fontFamily = FontFamily.SansSerif) },
             placeholder = { Text("ejemplo@email.com") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
@@ -120,10 +102,10 @@ fun RegisterScreen(
         Spacer(modifier = Modifier.height(20.dp))
 
         OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = {Text("Contraseña", fontFamily = FontFamily.SansSerif)},
-            placeholder = {Text("Contraseña", fontFamily = FontFamily.SansSerif)},
+            value = state.password,
+            onValueChange = viewModel::onPasswordChange,
+            label = { Text("Contraseña", fontFamily = FontFamily.SansSerif) },
+            placeholder = { Text("Contraseña", fontFamily = FontFamily.SansSerif) },
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             modifier = Modifier.fillMaxWidth(),
@@ -133,39 +115,29 @@ fun RegisterScreen(
         Spacer(modifier = Modifier.height(20.dp))
 
         OutlinedTextField(
-            value = Confirmpassword,
-            onValueChange = {Confirmpassword = it},
-            label = {Text("Confirmar contraseña", fontFamily = FontFamily.SansSerif)},
-            placeholder = {Text("ejemplo12345")},
+            value = state.confirmPassword,
+            onValueChange = viewModel::onConfirmPasswordChange,
+            label = { Text("Confirmar contraseña", fontFamily = FontFamily.SansSerif) },
+            placeholder = { Text("ejemplo12345") },
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             modifier = Modifier.fillMaxWidth(),
-            //isError = false
+            singleLine = true
         )
 
-        /* La logica no esta definida asi que he comentado esto para añadirlo a futuro
-        if (state.passwordMismatch) {
+        state.error?.let {
+            Spacer(modifier = Modifier.height(10.dp))
             Text(
-                text = "Las contraseñas no coinciden",
-                color = MaterialTheme.colorScheme.error,
-                fontSize = 12.sp
-            )
-        }
-
-        if (state.error != null) {
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = state.error!!,
-                color = MaterialTheme.colorScheme.error,
+                text = it,
+                color = Color.Red,
                 fontSize = 13.sp
             )
         }
-        */
+
         Spacer(modifier = Modifier.height(40.dp))
 
         Button(
-            onClick = { /*viewModel.register(onRegisterSuccess)*/ },
-            //enabled = !state.isLoading,
+            onClick = { onRegisterSuccess() },
             shape = RoundedCornerShape(8.dp),
             contentPadding = PaddingValues(vertical = 4.dp, horizontal = 80.dp),
             colors = ButtonDefaults.buttonColors(MainColor),
@@ -173,21 +145,9 @@ fun RegisterScreen(
                 .width(250.dp)
                 .height(48.dp)
         ) {
-            /*
-            if (state.isLoading) {
-                CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
-            } else {
-                Text("Confirmar")
-            }*/
-
             Text(text = "Confirmar")
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-
-
-
     }
 }
-
-

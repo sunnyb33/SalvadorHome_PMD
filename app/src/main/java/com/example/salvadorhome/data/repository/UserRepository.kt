@@ -14,4 +14,11 @@ class UserRepository(
     suspend fun getUserByEmail(email: String): UserEntity? {
         return userDao.getUserByEmail(email)
     }
+
+    suspend fun login(
+        email: String,
+        password: String
+    ): UserEntity? {
+        return userDao.login(email, password)
+    }
 }
