@@ -34,6 +34,7 @@ import com.example.salvadorhome.core.theme.SalvadorTextSecondary
 import com.example.salvadorhome.features.host.ui.screens.HostDashboardScreen
 import com.example.salvadorhome.features.host.ui.screens.HostingDetailScreen
 import com.example.salvadorhome.features.host.ui.screens.PublishHostingScreen
+import com.example.salvadorhome.features.profile.ui.ProfileScreen
 import com.example.salvadorhome.features.shared.model.Hosting
 import com.example.salvadorhome.features.shared.model.SampleHostings
 import com.example.salvadorhome.features.shared.model.Conversation
@@ -98,7 +99,9 @@ fun HostApp() {
                 onConversationClick = { selectedConversation = it }
             )
             HostDestination.BOOKINGS -> EmptySection("Reservas", "Administra las solicitudes y próximas estadías.", Icons.Default.Bed, Modifier.padding(padding))
-            HostDestination.PROFILE -> EmptySection("Perfil", "Configura tu cuenta y la información de anfitrión.", Icons.Default.Person, Modifier.padding(padding))
+            HostDestination.PROFILE -> ProfileScreen(
+                modifier = Modifier.padding(padding)
+            )
         }
     }
 }
