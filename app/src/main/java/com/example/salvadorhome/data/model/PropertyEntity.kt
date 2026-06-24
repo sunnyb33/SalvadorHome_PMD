@@ -10,6 +10,7 @@ data class PropertyEntity(
     val id: String,
     val title: String,
     val location: String,
+    val description: String,
     val pricePerNight: Double,
     val capacity: Int,
     val category: String,

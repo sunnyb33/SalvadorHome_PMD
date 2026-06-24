@@ -56,6 +56,7 @@ fun RegisterScreen(
     var apellido by remember { mutableStateOf("") } //Temporal
     var password by remember { mutableStateOf("") } //Temporal
     var Confirmpassword by remember { mutableStateOf("") }//Temporal
+    var email by remember { mutableStateOf("") }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -100,6 +101,18 @@ fun RegisterScreen(
             onValueChange = { apellido = it },
             label = {Text("Apellido", fontFamily = FontFamily.SansSerif)},
             placeholder = {Text("Apellido", fontFamily = FontFamily.SansSerif)},
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        OutlinedTextField(
+            value = email,
+            onValueChange = { email = it },
+            label = { Text("Correo electrónico", fontFamily = FontFamily.SansSerif) },
+            placeholder = { Text("ejemplo@email.com") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
         )

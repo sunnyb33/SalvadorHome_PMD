@@ -15,8 +15,19 @@ interface UserDao {
     @Query("SELECT * FROM users")
     suspend fun getAllUsers(): List<UserEntity>
 
-    @Query("SELECT * FROM users WHERE email = :email")
+    @Query("SELECT * FROM users WHERE email = :email LIMIT 1")
     suspend fun getUserByEmail(email: String): UserEntity?
+
+    @Query("""
+        SELECT * FROM users
+        WHERE email = :email
+        AND password = :password
+        LIMIT 1
+    """)
+    suspend fun login(
+        email: String,
+        password: String
+    ): UserEntity?
 
     @Delete
     suspend fun deleteUser(user: UserEntity)
