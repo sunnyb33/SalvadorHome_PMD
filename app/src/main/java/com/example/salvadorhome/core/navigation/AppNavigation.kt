@@ -1,8 +1,6 @@
 package com.example.salvadorhome.core.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -11,19 +9,12 @@ import com.example.salvadorhome.features.auth.ui.LoginScreen
 import com.example.salvadorhome.features.auth.ui.RegisterScreen
 import com.example.salvadorhome.features.auth.ui.RoleSelectionScreen
 import com.example.salvadorhome.features.auth.ui.WelcomeScreen
-import com.example.salvadorhome.features.auth.viewmodel.AuthViewModel
-import com.example.salvadorhome.features.auth.viewmodel.AuthViewModelProvider
-import com.example.salvadorhome.features.home.ui.HomeScreen
+import com.example.salvadorhome.features.home.ui.HomeScreen // Importación corregida a features.home
 
 @Composable
 fun AppNavigation() {
 
     val navController = rememberNavController()
-    val context = LocalContext.current
-
-    val authViewModel: AuthViewModel = viewModel(
-        factory = AuthViewModelProvider.provideFactory(context)
-    )
 
     NavHost(
         navController = navController,
@@ -43,7 +34,8 @@ fun AppNavigation() {
 
         composable(Routes.Login.route) {
             LoginScreen(
-                onLoginSucces = {
+                // Corregimos el nombre: onLoginSuccess
+                onLoginSuccess = {
                     navController.navigate(Routes.Home.route) {
                         popUpTo(Routes.Welcome.route) {
                             inclusive = true
@@ -55,22 +47,25 @@ fun AppNavigation() {
 
         composable(Routes.Register.route) {
             RegisterScreen(
-                viewModel = authViewModel,
+                // Cuando el registro en Firebase sea exitoso, lo mandamos directo al Home
                 onRegisterSuccess = {
-                    navController.navigate(Routes.RoleSelection.route)
+                    navController.navigate(Routes.Home.route) {
+                        popUpTo(Routes.Welcome.route) {
+                            inclusive = true
+                        }
+                    }
                 }
             )
         }
 
         composable(Routes.RoleSelection.route) {
             RoleSelectionScreen(
-                viewModel = authViewModel,
-                onRoleConfirmed = {
-                    authViewModel.register {
-                        navController.navigate(Routes.Home.route) {
-                            popUpTo(Routes.Welcome.route) {
-                                inclusive = true
-                            }
+                onRoleSelected = { rolSeleccionado ->
+                    // Por ahora solo navegamos al Home.
+                    // Más adelante podemos hacer que esto actualice el rol en Firebase si lo deseas.
+                    navController.navigate(Routes.Home.route) {
+                        popUpTo(Routes.Welcome.route) {
+                            inclusive = true
                         }
                     }
                 }

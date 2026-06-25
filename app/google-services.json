@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "487432966175",
+    "project_id": "salvadorhome-d2aa6",
+    "storage_bucket": "salvadorhome-d2aa6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:487432966175:android:89f3e6577587ba9ccd852a",
+        "android_client_info": {
+          "package_name": "com.example.salvadorhome"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAA-ExEGu0oU2tK2STNpaQ7JMSh_FWVss8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
