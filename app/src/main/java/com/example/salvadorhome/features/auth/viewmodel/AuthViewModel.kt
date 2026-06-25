@@ -11,36 +11,58 @@ import kotlinx.coroutines.launch
 sealed class AuthState {
     object Idle : AuthState()
     object Loading : AuthState()
-    object Success : AuthState()
+    data class Success(val rol: String) : AuthState()
     data class Error(val message: String) : AuthState()
 }
 
-class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
+class AuthViewModel(
+    private val repository: AuthRepository
+) : ViewModel() {
 
     private val _authState = MutableStateFlow<AuthState>(AuthState.Idle)
     val authState: StateFlow<AuthState> = _authState.asStateFlow()
 
     fun login(email: String, clave: String) {
         _authState.value = AuthState.Loading
+
         viewModelScope.launch {
             val result = repository.login(email, clave)
+
             if (result.isSuccess) {
-                _authState.value = AuthState.Success
+                val rol = result.getOrNull() ?: "ARRENDATARIO"
+                _authState.value = AuthState.Success(rol)
             } else {
-                _authState.value = AuthState.Error(result.exceptionOrNull()?.message ?: "Error desconocido")
+                _authState.value = AuthState.Error(
+                    result.exceptionOrNull()?.message ?: "Error desconocido"
+                )
             }
         }
     }
 
-    // AQUI ESTÁ LA CLAVE: Ahora pide 5 datos
-    fun register(email: String, clave: String, nombre: String, apellido: String, rol: String) {
+    fun register(
+        email: String,
+        clave: String,
+        nombre: String,
+        apellido: String,
+        rol: String
+    ) {
         _authState.value = AuthState.Loading
+
         viewModelScope.launch {
-            val result = repository.register(email, clave, nombre, apellido, rol)
+            val result = repository.register(
+                email = email,
+                clave = clave,
+                nombre = nombre,
+                apellido = apellido,
+                rol = rol
+            )
+
             if (result.isSuccess) {
-                _authState.value = AuthState.Success
+                _authState.value = AuthState.Success(rol)
             } else {
-                _authState.value = AuthState.Error(result.exceptionOrNull()?.message ?: "Error al registrar")
+                _authState.value = AuthState.Error(
+                    result.exceptionOrNull()?.message ?: "Error al registrar"
+                )
             }
         }
     }

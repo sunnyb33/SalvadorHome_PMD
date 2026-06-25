@@ -1,5 +1,6 @@
 package com.example.salvadorhome.features.home.ui
 
+import androidx.compose.material3.Button
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -50,7 +51,9 @@ import com.example.salvadorhome.features.shared.ui.components.SalvadorBottomBar
 @Composable
 fun HomeScreen(
     onPropertyClick: (String) -> Unit = {},
-    onNavItemClick: (Int) -> Unit = {}
+    onNavItemClick: (Int) -> Unit = {},
+    userRole: String = "",
+    onHostClick: () -> Unit = {}
 ) {
     val context = LocalContext.current
 
@@ -98,7 +101,10 @@ fun HomeScreen(
         bottomBar = {
             SalvadorBottomBar(
                 selectedIndex = selectedIndex,
-                onItemSelected = { selectedIndex = it }
+                onItemSelected = { index ->
+                    selectedIndex = index
+                    onNavItemClick(index)
+                }
             )
         },
         containerColor = Color.White
@@ -129,6 +135,16 @@ fun HomeScreen(
                         fontSize = 13.sp,
                         color = Color.Gray
                     )
+
+                    if (userRole.equals("AMBOS", ignoreCase = true)) {
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        Button(
+                            onClick = onHostClick
+                        ) {
+                            Text("Ir a modo anfitrión")
+                        }
+                    }
                 }
 
                 Box(

@@ -11,4 +11,5 @@ sealed class Routes(val route: String) {
     object RoleSelection : Routes("role_selection")
 
     object Home : Routes("home")
+    object Host : Routes("host")
 }
