@@ -1,10 +1,14 @@
 package com.example.salvadorhome.core.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-
+import com.example.salvadorhome.features.host.ui.HostApp
 import com.example.salvadorhome.features.auth.ui.LoginScreen
 import com.example.salvadorhome.features.auth.ui.RegisterScreen
 import com.example.salvadorhome.features.auth.ui.RoleSelectionScreen
@@ -15,7 +19,7 @@ import com.example.salvadorhome.features.home.ui.HomeScreen // Importación corr
 fun AppNavigation() {
 
     val navController = rememberNavController()
-
+    var currentRole by remember { mutableStateOf("") }
     NavHost(
         navController = navController,
         startDestination = Routes.Welcome.route
@@ -71,12 +75,23 @@ fun AppNavigation() {
                 }
             )
         }
-
         composable(Routes.Home.route) {
             HomeScreen(
+                userRole = currentRole,
+                onHostClick = {
+                    navController.navigate(Routes.Host.route)
+                },
                 onPropertyClick = {},
-                onNavItemClick = {}
+                onNavItemClick = { index ->
+                    when (index) {
+                        3 -> navController.navigate(Routes.Host.route)
+                    }
+                }
             )
+        }
+
+        composable(Routes.Host.route) {
+            HostApp()
         }
     }
 }
