@@ -17,6 +17,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import com.example.salvadorhome.features.auth.viewmodel.AuthViewModel
 import androidx.compose.ui.Modifier
@@ -28,30 +30,36 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.salvadorhome.features.auth.viewmodel.AuthViewModelProvider
 
 @Preview(showBackground = true) //Previsualizacion previa
 @Composable
 fun LoginScreen(
     onLoginSucces: () -> Unit = {},
-    onForgotPassword: () -> Unit = {},
-    ViewModel: AuthViewModel = viewModel()
-){
-    //Colores
+) {
     val TextColor = Color(0xFF0A1128)
     val MainColor = Color(0xFF0A1128)
     val ButtonTextColor = Color(0xFFF5F5F5)
     val PlaceholderColor = Color(0xFFAAB2CB)
 
+    val context = LocalContext.current
+
+    val viewModel: AuthViewModel = viewModel(
+        factory = AuthViewModelProvider.provideFactory(context)
+    )
+    LaunchedEffect(Unit) {
+        viewModel.insertTestUser()
+    }
+
+    val state by viewModel.uiState.collectAsState()
+
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    //val state by viewModel.uiState.collectAsState()
-/*
-*La logica de la autenticación esta vacia, por tanto aun no puedo añadir el viewmodel
-* en el codigo del fronten T T
-* */
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -68,22 +76,21 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-
-        /*
-        * Modificar value y value on change ya que no tienen logica
-        * estan descritos de esta manera solo para mostrarse, se modificara cuando
-        * la logica del viewmodel este realizada*/
         OutlinedTextField(
-            value = email,
-            onValueChange = { email = it } ,
-            label = { Text(
-                text = "Email",
-                color = TextColor
-            )},
-            placeholder = {Text(
-                text = "ejemplo@email.com",
-                color = PlaceholderColor
-            )},
+            value = state.email,
+            onValueChange = viewModel::onEmailChange,
+            label = {
+                Text(
+                    text = "Email",
+                    color = TextColor
+                )
+            },
+            placeholder = {
+                Text(
+                    text = "ejemplo@email.com",
+                    color = PlaceholderColor
+                )
+            },
             colors = TextFieldDefaults.colors(
                 unfocusedTextColor = Color(0xFFA1B2E8),
                 focusedIndicatorColor = Color(0xFFEBEEFA),
@@ -98,10 +105,9 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        //Contraseña
         OutlinedTextField(
-            value = password, //Temporal
-            onValueChange = {password = it}, // Temporal
+            value = state.password,
+            onValueChange = viewModel::onPasswordChange,
             label = {
                 Text(
                     text = "Contraseña",
@@ -118,38 +124,36 @@ fun LoginScreen(
                 unfocusedTextColor = Color(0xFFB5D3E0),
                 focusedIndicatorColor = Color(0xFFB5D3E0),
                 focusedTextColor = TextColor
-        ),
+            ),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp),
             singleLine = true
         )
+        state.error?.let {
+            Text(
+                text = it,
+                color = Color.Red
+            )
+        }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        //Esto es opcional para no complicar el backend al momento de recuperar la contraseña
-        TextButton(onClick = onForgotPassword) {
-            Text(
-                text = "¿Has olvidado tu contraseña?",
-                fontWeight = FontWeight.Bold,
-                fontFamily = FontFamily.SansSerif,
-                color = TextColor
-            )
-        }
 
         Spacer(modifier = Modifier.weight(0.1f))
 
         Button(
-            onClick = {/*viewModel.login(onLoginSucces)*/}, //Se añadira cuando la logica sea implementada
-            //enabled = !state.isLoading,
+            onClick = {
+                viewModel.login(onLoginSucces)
+            },
             shape = RoundedCornerShape(8.dp),
             contentPadding = PaddingValues(vertical = 4.dp, horizontal = 80.dp),
             colors = ButtonDefaults.buttonColors(MainColor),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp)
-        ){/*
+        ) {/*
             if(state.isLoading){
                 CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
             } else {
@@ -162,27 +166,10 @@ fun LoginScreen(
             )
         }
 
-            Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
-        /* Boton login por google el cual no esta definido en los alcances, por tanto
-        * queda opcional su adición al proyecto, pero el diseño estara realizado en caso de que
-        * se termine añadiendo su diseño se encuentra aca comentado
-        *
-        * OutlinedBUtton(
-        *   OnClick = {/Viewmodel.loginWithGoogle()/}
-        *   shape = RoundedCornerShape(8.dp),
-        *   modifier = Modifier
-        *       .fillMaxWidth()
-        *       .height(48.dp)
-        * ){
-        *     Row(){
-        *       Image (imagen de google)
-        *       Text ("Iniciar sesión con google)
-        *   }
-        * }
-        */
 
-            Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(16.dp))
     }
 
 }

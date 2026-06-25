@@ -45,6 +45,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -68,6 +69,16 @@ fun PublishHostingScreen(
     var expanded by remember { mutableStateOf(false) }
     var termsAccepted by remember { mutableStateOf(false) }
     val locations = listOf("San Salvador", "La Libertad", "Santa Ana", "Sonsonate", "Ahuachapán")
+    var pricePerNight by remember { mutableStateOf("") }
+    var capacity by remember { mutableStateOf("") }
+    var category by remember { mutableStateOf("PLAYA") }
+    var categoryExpanded by remember { mutableStateOf(false) }
+    val categories = listOf(
+        "PLAYA",
+        "NATURALEZA",
+        "HOTEL",
+        "MONTAÑA"
+    )
 
     LazyColumn(
         modifier = modifier.fillMaxSize().imePadding(),
@@ -118,6 +129,67 @@ fun PublishHostingScreen(
                         modifier = Modifier.fillMaxWidth().height(120.dp),
                         placeholder = { Text("Describe tu hospedaje") }
                     )
+                    Label("Precio por noche")
+                    OutlinedTextField(
+                        value = pricePerNight,
+                        onValueChange = { pricePerNight = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        placeholder = { Text("Ej. 50") },
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number
+                        )
+                    )
+                    Label("Capacidad")
+                    OutlinedTextField(
+                        value = capacity,
+                        onValueChange = { capacity = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        placeholder = { Text("Ej. 4 huéspedes") },
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number
+                        )
+                    )
+                    Label("Categoría")
+                    ExposedDropdownMenuBox(
+                        expanded = categoryExpanded,
+                        onExpandedChange = {
+                            categoryExpanded = !categoryExpanded
+                        }
+                    ) {
+
+                        OutlinedTextField(
+                            value = category,
+                            onValueChange = {},
+                            readOnly = true,
+                            modifier = Modifier
+                                .menuAnchor(
+                                    ExposedDropdownMenuAnchorType.PrimaryNotEditable
+                                )
+                                .fillMaxWidth(),
+                            trailingIcon = {
+                                ExposedDropdownMenuDefaults.TrailingIcon(
+                                    expanded = categoryExpanded
+                                )
+                            }
+                        )
+
+                        ExposedDropdownMenu(
+                            expanded = categoryExpanded,
+                            onDismissRequest = {
+                                categoryExpanded = false
+                            }
+                        ) {
+                            categories.forEach {
+                                DropdownMenuItem(
+                                    text = { Text(it) },
+                                    onClick = {
+                                        category = it
+                                        categoryExpanded = false
+                                    }
+                                )
+                            }
+                        }
+                    }
                     Label("Imágenes del hospedaje")
                     Surface(
                         modifier = Modifier.fillMaxWidth().height(100.dp).clickable { },

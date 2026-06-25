@@ -22,6 +22,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,34 +32,66 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.salvadorhome.features.properties.model.Property
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.salvadorhome.data.local.database.DatabaseProvider
+import com.example.salvadorhome.data.repository.PropertyRepository
 import com.example.salvadorhome.features.properties.model.PropertyCategory
+import com.example.salvadorhome.features.properties.viewmodel.PropertyViewModel
+import com.example.salvadorhome.features.properties.viewmodel.PropertyViewModelFactory
 import com.example.salvadorhome.features.shared.ui.components.PropertyCard
 import com.example.salvadorhome.features.shared.ui.components.SalvadorBottomBar
-
-@Preview(showBackground = true)
+@Preview
 @Composable
 fun HomeScreen(
     onPropertyClick: (String) -> Unit = {},
     onNavItemClick: (Int) -> Unit = {}
-    // viewModel: HomeViewModel = viewModel()
 ) {
-    val MainColor      = Color(0xFF0A1128)
+    val context = LocalContext.current
+
+    val viewModel: PropertyViewModel = viewModel(
+        factory = PropertyViewModelFactory(
+            PropertyRepository(
+                DatabaseProvider
+                    .getDatabase(context)
+                    .propertyDao()
+            )
+        )
+    )
+    val MainColor = Color(0xFF0A1128)
     val ChipSelectedBg = Color(0xFF0A1128)
     val ChipTextColor  = Color(0xFFF5F5F5)
+    val state by viewModel.uiState.collectAsState()
 
-    // Remplazar cuando el viewmodel este listo
-    var selectedCategory by remember { mutableStateOf(PropertyCategory.TODOS) }
-    var selectedIndex    by remember { mutableStateOf(0) }
+    LaunchedEffect(Unit) {
+        viewModel.loadProperties()
+    }
 
-    //Cambiar cuando el backend este
-    val filteredProperties = remember(selectedCategory) {
-        emptyList<Property>()
+    var selectedCategory by remember {
+        mutableStateOf(PropertyCategory.TODOS)
+    }
+
+    var selectedIndex by remember {
+        mutableStateOf(0)
+    }
+
+    val filteredProperties = remember(
+        selectedCategory,
+        state.properties
+    ) {
+
+        if (selectedCategory == PropertyCategory.TODOS) {
+            state.properties
+        } else {
+            state.properties.filter {
+                it.category == selectedCategory
+            }
+        }
     }
 
     Scaffold(
@@ -198,3 +232,4 @@ fun HomeScreen(
         }
     }
 }
+
