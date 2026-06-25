@@ -1,8 +1,7 @@
 package com.example.salvadorhome.features.auth.viewmodel
 
 import android.content.Context
-import com.example.salvadorhome.data.local.database.DatabaseProvider
-import com.example.salvadorhome.data.repository.UserRepository
+import com.example.salvadorhome.data.repository.AuthRepository
 
 object AuthViewModelProvider {
 
@@ -10,16 +9,9 @@ object AuthViewModelProvider {
         context: Context
     ): AuthViewModelFactory {
 
-        val database =
-            DatabaseProvider.getDatabase(context)
+        // Simplemente le pasamos el repositorio de Firebase
+        val repository = AuthRepository()
 
-        val repository =
-            UserRepository(
-                database.userDao()
-            )
-
-        return AuthViewModelFactory(
-            repository
-        )
+        return AuthViewModelFactory(repository)
     }
 }
