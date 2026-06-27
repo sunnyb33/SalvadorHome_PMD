@@ -28,12 +28,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.salvadorhome.core.theme.SalvadorHomeTheme
 import com.example.salvadorhome.core.theme.SalvadorLavender
 import com.example.salvadorhome.core.theme.SalvadorTextSecondary
 import com.example.salvadorhome.features.host.ui.screens.HostDashboardScreen
 import com.example.salvadorhome.features.host.ui.screens.HostingDetailScreen
 import com.example.salvadorhome.features.host.ui.screens.PublishHostingScreen
+import com.example.salvadorhome.features.host.viewmodel.HostingViewModel
 import com.example.salvadorhome.features.profile.ui.ProfileScreen
 import com.example.salvadorhome.features.shared.model.Hosting
 import com.example.salvadorhome.features.shared.model.SampleHostings
@@ -52,7 +54,7 @@ fun HostApp() {
     var selectedHosting by remember { mutableStateOf<Hosting?>(null) }
     var selectedConversation by remember { mutableStateOf<Conversation?>(null) }
     val hostings = remember { mutableStateListOf<Hosting>().apply { addAll(SampleHostings) } }
-
+    val hostingViewModel: HostingViewModel = viewModel()
     Scaffold(
         bottomBar = {
             SalvadorBottomBar(
@@ -84,21 +86,54 @@ fun HostApp() {
                 onHostingClick = { selectedHosting = it },
                 onPublishClick = { destination = HostDestination.PUBLISH }
             )
-            HostDestination.EXPLORE -> ExploreScreen(hostings, Modifier.padding(padding)) { selectedHosting = it }
+
+            HostDestination.EXPLORE -> ExploreScreen(
+                hostings,
+                Modifier.padding(padding)
+            ) { selectedHosting = it }
+
             HostDestination.PUBLISH -> PublishHostingScreen(
                 Modifier.padding(padding),
                 onBack = { destination = HostDestination.HOME }
-            ) { title, location, description ->
-                hostings.add(0, Hosting(title, location, description, "Precio por definir", palette = listOf(Color(0xFFC2A5E7), Color(0xFF665089))))
-                destination = HostDestination.HOME
+            ) { title, location, description, pricePerNight, capacity, category ->
+
+                hostingViewModel.publishHosting(
+                    title = title,
+                    location = location,
+                    description = description,
+                    pricePerNight = pricePerNight,
+                    capacity = capacity,
+                    category = category,
+                    onSuccess = {
+                        hostings.add(
+                            0,
+                            Hosting(
+                                title,
+                                location,
+                                description,
+                                "$$pricePerNight / noche",
+                                palette = listOf(Color(0xFFC2A5E7), Color(0xFF665089))
+                            )
+                        )
+                        destination = HostDestination.HOME
+                    }
+                )
             }
+
             HostDestination.MESSAGES -> MessagesScreen(
                 conversations = SampleConversations,
                 modifier = Modifier.padding(padding),
                 onBack = { destination = HostDestination.HOME },
                 onConversationClick = { selectedConversation = it }
             )
-            HostDestination.BOOKINGS -> EmptySection("Reservas", "Administra las solicitudes y próximas estadías.", Icons.Default.Bed, Modifier.padding(padding))
+
+            HostDestination.BOOKINGS -> EmptySection(
+                "Reservas",
+                "Administra las solicitudes y próximas estadías.",
+                Icons.Default.Bed,
+                Modifier.padding(padding)
+            )
+
             HostDestination.PROFILE -> ProfileScreen(
                 modifier = Modifier.padding(padding)
             )
@@ -109,15 +144,29 @@ fun HostApp() {
 @Composable
 private fun EmptySection(title: String, subtitle: String, icon: ImageVector, modifier: Modifier) {
     Column(
-        modifier = modifier.fillMaxSize().padding(28.dp),
+        modifier = modifier
+            .fillMaxSize()
+            .padding(28.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Surface(color = SalvadorLavender, shape = CircleShape) {
-            Icon(icon, null, modifier = Modifier.padding(20.dp).size(42.dp))
+            Icon(icon, null, modifier = Modifier
+                .padding(20.dp)
+                .size(42.dp))
         }
-        Text(title, fontSize = 24.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 18.dp))
-        Text(subtitle, color = SalvadorTextSecondary, textAlign = TextAlign.Center, modifier = Modifier.padding(top = 8.dp))
+        Text(
+            title,
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(top = 18.dp)
+        )
+        Text(
+            subtitle,
+            color = SalvadorTextSecondary,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(top = 8.dp)
+        )
     }
 }
 

@@ -13,7 +13,7 @@ import com.example.salvadorhome.features.auth.ui.LoginScreen
 import com.example.salvadorhome.features.auth.ui.RegisterScreen
 import com.example.salvadorhome.features.auth.ui.RoleSelectionScreen
 import com.example.salvadorhome.features.auth.ui.WelcomeScreen
-import com.example.salvadorhome.features.home.ui.HomeScreen // Importación corregida a features.home
+import com.example.salvadorhome.features.guest.ui.GuestApp
 
 @Composable
 fun AppNavigation() {
@@ -76,16 +76,10 @@ fun AppNavigation() {
             )
         }
         composable(Routes.Home.route) {
-            HomeScreen(
+            GuestApp(
                 userRole = currentRole,
                 onHostClick = {
                     navController.navigate(Routes.Host.route)
-                },
-                onPropertyClick = {},
-                onNavItemClick = { index ->
-                    when (index) {
-                        3 -> navController.navigate(Routes.Host.route)
-                    }
                 }
             )
         }
@@ -93,5 +87,6 @@ fun AppNavigation() {
         composable(Routes.Host.route) {
             HostApp()
         }
+
     }
 }

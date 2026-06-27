@@ -50,11 +50,12 @@ import com.example.salvadorhome.features.shared.ui.components.SalvadorBottomBar
 @Preview
 @Composable
 fun HomeScreen(
+    modifier: Modifier = Modifier,
     onPropertyClick: (String) -> Unit = {},
-    onNavItemClick: (Int) -> Unit = {},
     userRole: String = "",
     onHostClick: () -> Unit = {}
-) {
+)
+{
     val context = LocalContext.current
 
     val viewModel: PropertyViewModel = viewModel(
@@ -79,10 +80,6 @@ fun HomeScreen(
         mutableStateOf(PropertyCategory.TODOS)
     }
 
-    var selectedIndex by remember {
-        mutableStateOf(0)
-    }
-
     val filteredProperties = remember(
         selectedCategory,
         state.properties
@@ -97,27 +94,13 @@ fun HomeScreen(
         }
     }
 
-    Scaffold(
-        bottomBar = {
-            SalvadorBottomBar(
-                selectedIndex = selectedIndex,
-                onItemSelected = { index ->
-                    selectedIndex = index
-                    onNavItemClick(index)
-                }
-            )
-        },
-        containerColor = Color.White
-    ) { innerPadding ->
-
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp, vertical = 24.dp)
-        ) {
-
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .background(Color.White)
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 20.dp, vertical = 24.dp)
+    ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -247,5 +230,5 @@ fun HomeScreen(
             }
         }
     }
-}
+
 
