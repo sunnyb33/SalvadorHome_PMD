@@ -49,6 +49,11 @@ import com.example.salvadorhome.core.theme.SalvadorLavenderLight
 import com.example.salvadorhome.core.theme.SalvadorNavy
 import com.example.salvadorhome.core.theme.SalvadorOutline
 import com.example.salvadorhome.features.shared.ui.components.SalvadorBottomBar
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import com.example.salvadorhome.features.profile.viewmodel.ProfileViewModel
 
 @Composable
 fun ProfileScreen(
@@ -59,6 +64,15 @@ fun ProfileScreen(
     onHelp: () -> Unit = {},
     onLogout: () -> Unit = {}
 ) {
+    val viewModel: ProfileViewModel = viewModel()
+    val state by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(Unit) {
+        viewModel.loadProfile()
+    }
+
+    val profile = state.profile
+
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(horizontal = 20.dp, vertical = 20.dp),
@@ -68,9 +82,20 @@ fun ProfileScreen(
             Text("Mi perfil", color = SalvadorNavy, fontSize = 25.sp, fontWeight = FontWeight.Bold)
             Text("Administra tu información y preferencias", color = SalvadorBlue, fontSize = 13.sp)
         }
-        item { ProfileHeader(onEditProfile) }
+        item {
+            ProfileHeader(
+                fullName = "${profile?.nombre.orEmpty()} ${profile?.apellido.orEmpty()}",
+                role = profile?.rol.orEmpty(),
+                onEditProfile = onEditProfile
+            )
+        }
         item { SectionTitle("Información personal") }
-        item { PersonalInformationCard() }
+        item {
+            PersonalInformationCard(
+                fullName = "${profile?.nombre.orEmpty()} ${profile?.apellido.orEmpty()}",
+                email = profile?.email.orEmpty()
+            )
+        }
         item { SectionTitle("Configuración") }
         item { ProfileOptionsCard(onNotifications, onSecurity, onHelp) }
         item { LogoutButton(onLogout) }
@@ -84,7 +109,11 @@ private fun SectionTitle(text: String) {
 }
 
 @Composable
-private fun ProfileHeader(onEditProfile: () -> Unit) {
+private fun ProfileHeader(
+    fullName: String,
+    role: String,
+    onEditProfile: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -107,7 +136,7 @@ private fun ProfileHeader(onEditProfile: () -> Unit) {
             )
         }
         Text(
-            "Chepito Martinez",
+            fullName.ifBlank { "Usuario" },
             modifier = Modifier.padding(top = 12.dp),
             color = SalvadorNavy,
             fontSize = 20.sp,
@@ -119,7 +148,7 @@ private fun ProfileHeader(onEditProfile: () -> Unit) {
             shape = RoundedCornerShape(50)
         ) {
             Text(
-                "Arrendador",
+                role.ifBlank { "Sin rol" },
                 modifier = Modifier.padding(horizontal = 14.dp, vertical = 5.dp),
                 color = SalvadorNavy,
                 fontSize = 12.sp,
@@ -130,21 +159,30 @@ private fun ProfileHeader(onEditProfile: () -> Unit) {
 }
 
 @Composable
-private fun PersonalInformationCard() {
+private fun PersonalInformationCard(
+    fullName: String,
+    email: String
+) {
     ProfileCard {
-        InformationRow(Icons.Default.Badge, "Nombre completo", "Chepito Martinez")
+        InformationRow(Icons.Default.Badge, "Nombre completo", fullName.ifBlank { "Usuario" })
         HorizontalDivider(color = SalvadorOutline.copy(alpha = 0.65f))
-        InformationRow(Icons.Default.Email, "Correo electrónico", "12345@gmail.com")
+        InformationRow(Icons.Default.Email, "Correo electrónico", email.ifBlank { "Sin correo" })
     }
 }
 
 @Composable
 private fun InformationRow(icon: ImageVector, label: String, value: String) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(16.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Surface(modifier = Modifier.size(40.dp), shape = CircleShape, color = SalvadorLavenderLight) {
+        Surface(
+            modifier = Modifier.size(40.dp),
+            shape = CircleShape,
+            color = SalvadorLavenderLight
+        ) {
             Icon(icon, null, modifier = Modifier.padding(9.dp), tint = SalvadorBlue600)
         }
         Column(modifier = Modifier.padding(start = 12.dp)) {
@@ -184,13 +222,18 @@ private fun ProfileCard(content: @Composable () -> Unit) {
 @Composable
 private fun OptionRow(icon: ImageVector, title: String, onClick: () -> Unit) {
     Row(
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(16.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(icon, null, tint = SalvadorBlue600)
         Text(
             title,
-            modifier = Modifier.weight(1f).padding(start = 14.dp),
+            modifier = Modifier
+                .weight(1f)
+                .padding(start = 14.dp),
             color = SalvadorNavy,
             fontSize = 14.sp,
             fontWeight = FontWeight.Medium
