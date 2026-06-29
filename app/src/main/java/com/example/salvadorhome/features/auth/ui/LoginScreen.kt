@@ -39,10 +39,9 @@ import com.example.salvadorhome.features.auth.viewmodel.AuthState
 import com.example.salvadorhome.features.auth.viewmodel.AuthViewModel
 import com.example.salvadorhome.features.auth.viewmodel.AuthViewModelFactory
 
-// 1. LA PANTALLA INTELIGENTE (Habla con el ViewModel y Firebase. NO lleva @Preview)
 @Composable
 fun LoginScreen(
-    onLoginSuccess: () -> Unit = {},
+    onLoginSuccess: (String) -> Unit = {},
     onForgotPassword: () -> Unit = {},
     // Inyectamos el ViewModel usando el Factory de tu compañero
     viewModel: AuthViewModel = viewModel(factory = AuthViewModelFactory())
@@ -51,12 +50,11 @@ fun LoginScreen(
 
     LaunchedEffect(authState) {
         if (authState is AuthState.Success) {
-            onLoginSuccess()
+            onLoginSuccess((authState as AuthState.Success).rol)
             viewModel.resetState()
         }
     }
 
-    // Llamamos a la parte visual
     LoginScreenContent(
         authState = authState,
         onForgotPassword = onForgotPassword,
@@ -64,7 +62,6 @@ fun LoginScreen(
     )
 }
 
-// 2. EL PREVIEW (Datos falsos para no crashear)
 @Preview(showBackground = true)
 @Composable
 fun LoginScreenPreview() {
@@ -75,7 +72,6 @@ fun LoginScreenPreview() {
     )
 }
 
-// 3. LA PANTALLA VISUAL (Solo dibuja el diseño que ya tenías)
 @Composable
 fun LoginScreenContent(
     authState: AuthState,
@@ -144,7 +140,7 @@ fun LoginScreenContent(
         )
 
         Spacer(modifier = Modifier.height(8.dp))
-
+/*
         TextButton(onClick = onForgotPassword) {
             Text(
                 text = "¿Has olvidado tu contraseña?",
@@ -153,7 +149,7 @@ fun LoginScreenContent(
                 color = TextColor
             )
         }
-
+*/
         if (authState is AuthState.Error) {
             Text(
                 text = (authState as AuthState.Error).message,

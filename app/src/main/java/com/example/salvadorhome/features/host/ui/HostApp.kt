@@ -8,20 +8,19 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bed
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -32,13 +31,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.salvadorhome.core.theme.SalvadorHomeTheme
 import com.example.salvadorhome.core.theme.SalvadorLavender
 import com.example.salvadorhome.core.theme.SalvadorTextSecondary
+import com.example.salvadorhome.features.host.ui.screens.EditHostingScreen
 import com.example.salvadorhome.features.host.ui.screens.HostDashboardScreen
 import com.example.salvadorhome.features.host.ui.screens.HostingDetailScreen
 import com.example.salvadorhome.features.host.ui.screens.PublishHostingScreen
 import com.example.salvadorhome.features.host.viewmodel.HostingViewModel
 import com.example.salvadorhome.features.profile.ui.ProfileScreen
 import com.example.salvadorhome.features.shared.model.Hosting
-import com.example.salvadorhome.features.shared.model.SampleHostings
 import com.example.salvadorhome.features.shared.model.Conversation
 import com.example.salvadorhome.features.shared.model.SampleConversations
 import com.example.salvadorhome.features.shared.ui.components.SalvadorBottomBar
@@ -53,26 +52,65 @@ fun HostApp() {
     var destination by remember { mutableStateOf(HostDestination.HOME) }
     var selectedHosting by remember { mutableStateOf<Hosting?>(null) }
     var selectedConversation by remember { mutableStateOf<Conversation?>(null) }
-    val hostings = remember { mutableStateListOf<Hosting>().apply { addAll(SampleHostings) } }
     val hostingViewModel: HostingViewModel = viewModel()
+    val hostingState by hostingViewModel.uiState.collectAsState()
+    var editingHosting by remember {
+        mutableStateOf<Hosting?>(null)
+    }
+    LaunchedEffect(Unit) {
+        hostingViewModel.loadMyHostings()
+    }
     Scaffold(
         bottomBar = {
-            SalvadorBottomBar(
-                selectedIndex = destination.ordinal,
-                onItemSelected = { index ->
-                    selectedHosting = null
-                    selectedConversation = null
-                    destination = HostDestination.entries[index]
-                }
-            )
+            if (editingHosting == null && selectedHosting == null && selectedConversation == null) {
+                SalvadorBottomBar(
+                    selectedIndex = destination.ordinal,
+                    onItemSelected = { index ->
+                        selectedHosting = null
+                        selectedConversation = null
+                        editingHosting = null
+                        destination = HostDestination.entries[index]
+                    }
+                )
+            }
         }
     ) { padding ->
         val detail = selectedHosting
-        if (detail != null) {
+        if (editingHosting != null) {
+
+            EditHostingScreen(
+                hosting = editingHosting!!,
+                modifier = Modifier,
+                onBack = {
+                    editingHosting = null
+                },
+                onSave = { title, location, description, pricePerNight, capacity, category ->
+
+                    hostingViewModel.updateHosting(
+                        hostingId = editingHosting!!.id,
+                        title = title,
+                        location = location,
+                        description = description,
+                        pricePerNight = pricePerNight,
+                        capacity = capacity,
+                        category = category,
+                        onSuccess = {
+                            editingHosting = null
+                            selectedHosting = null
+                            hostingViewModel.loadMyHostings()
+                        }
+                    )
+                }
+            )
+
+        } else if (detail != null) {
             HostingDetailScreen(
                 hosting = detail,
                 onBack = { selectedHosting = null },
-                modifier = Modifier.padding(padding)
+                modifier = Modifier.padding(padding),
+                onEditClick = { hosting ->
+                    editingHosting = hosting
+                }
             )
         } else if (selectedConversation != null) {
             ChatScreen(
@@ -82,15 +120,19 @@ fun HostApp() {
             )
         } else when (destination) {
             HostDestination.HOME -> HostDashboardScreen(
-                hostings, Modifier.padding(padding),
+                hostings = hostingState.hostings,
+                modifier = Modifier.padding(padding),
                 onHostingClick = { selectedHosting = it },
                 onPublishClick = { destination = HostDestination.PUBLISH }
             )
 
             HostDestination.EXPLORE -> ExploreScreen(
-                hostings,
-                Modifier.padding(padding)
-            ) { selectedHosting = it }
+                hostings = hostingState.hostings,
+                modifier = Modifier.padding(padding),
+                onHostingClick = { hosting ->
+                    selectedHosting = hosting
+                }
+            )
 
             HostDestination.PUBLISH -> PublishHostingScreen(
                 Modifier.padding(padding),
@@ -105,16 +147,7 @@ fun HostApp() {
                     capacity = capacity,
                     category = category,
                     onSuccess = {
-                        hostings.add(
-                            0,
-                            Hosting(
-                                title,
-                                location,
-                                description,
-                                "$$pricePerNight / noche",
-                                palette = listOf(Color(0xFFC2A5E7), Color(0xFF665089))
-                            )
-                        )
+                        hostingViewModel.loadMyHostings()
                         destination = HostDestination.HOME
                     }
                 )

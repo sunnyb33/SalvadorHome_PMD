@@ -21,10 +21,9 @@ class AuthRepository {
                 .get()
                 .await()
 
-            val rol = document.getString("rol") ?: "ARRENDATARIO"
+            val rol = document.getString("rol") ?: "Arrendatario"
 
             Result.success(rol)
-
         } catch (e: Exception) {
             Result.failure(e)
         }

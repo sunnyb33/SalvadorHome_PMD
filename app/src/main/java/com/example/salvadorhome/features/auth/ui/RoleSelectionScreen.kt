@@ -9,11 +9,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.salvadorhome.R
 import com.example.salvadorhome.features.auth.ui.components.RoleOption
-
+@Preview
 @Composable
 fun RoleSelectionScreen(
     onRoleSelected: (String) -> Unit = {}
@@ -41,7 +42,6 @@ fun RoleSelectionScreen(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // AGREGADO: icon = R.drawable.icono_arrendador
         RoleOption(
             icon = R.drawable.icono_arrendador,
             title = "Quiero hospedar",
@@ -55,7 +55,6 @@ fun RoleSelectionScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // AGREGADO: icon = R.drawable.arrendatario_icon
         RoleOption(
             icon = R.drawable.arrendatario_icon,
             title = "Quiero viajar",
@@ -63,6 +62,19 @@ fun RoleSelectionScreen(
             isSelected = selectedRole == "Arrendatario",
             onClick = {
                 selectedRole = "Arrendatario"
+                showError = false
+            }
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        RoleOption(
+            icon = R.drawable.ambos_rol_icon,
+            title = "Ambos",
+            description = "Publica hospedajes y también reserva alojamientos",
+            isSelected = selectedRole == "Ambos",
+            onClick = {
+                selectedRole = "Ambos"
                 showError = false
             }
         )
@@ -86,7 +98,9 @@ fun RoleSelectionScreen(
                     showError = true
                 }
             },
-            modifier = Modifier.fillMaxWidth().height(48.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(48.dp),
             colors = ButtonDefaults.buttonColors(containerColor = MainColor),
             shape = RoundedCornerShape(8.dp)
         ) {
