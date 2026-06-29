@@ -46,8 +46,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.salvadorhome.features.shared.ui.components.HostingArtwork
 import com.example.salvadorhome.features.shared.ui.components.ServicesGrid
+import com.google.firebase.auth.FirebaseAuth
 
-//Cambiar cuando el backend exista
 data class PropertyDetail(
     val id: String,
     val name: String,
@@ -60,6 +60,7 @@ data class PropertyDetail(
     val description: String,
     val highlights: List<String>,
     val reviews: List<ReviewItem>,
+    val ownerId: String = "",
     val bannerColors: List<Color> = listOf(Color(0xFFD7B28C), Color(0xFF78543C))
 )
 
@@ -86,6 +87,7 @@ private val fakeDetail = PropertyDetail(
         "Acceso privado a la playa",
         "Estacionamiento para 2 vehículos"
     ),
+    ownerId = "",
     reviews = listOf(
         ReviewItem("Reviewer name", "Enero 2026", "Excelente lugar, muy limpio y cómodo. El dueño muy atento en todo momento.", 5.0f),
         ReviewItem("Reviewer name", "Febrero 2026", "Nos encantó la vista al mar. Definitivamente volvemos.", 4.0f),
@@ -160,13 +162,14 @@ private fun ReviewCard(review: ReviewItem) {
 fun PropertyDetailScreen(
     property: PropertyDetail = fakeDetail,
     onBackClick: () -> Unit = {},
-    onReserveClick: () -> Unit = {}
-    // viewModel: PropertyDetailViewModel = viewModel()
+    onReserveClick: () -> Unit = {},
+    onEditClick: (PropertyDetail) -> Unit = {}
 ) {
     val MainColor    = Color(0xFF0A1128)
     val LavenderColor = Color(0xFFE8E8F8)
-
     var isFavorite by remember { mutableStateOf(false) }
+    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
+    val canEdit = property.ownerId.isNotBlank() && property.ownerId == currentUserId
 
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -397,13 +400,23 @@ fun PropertyDetailScreen(
                 }
 
                 Button(
-                    onClick = onReserveClick,
-                    //Cambiar cuando la logica de navegación este lista
+                    onClick = {
+                        if (canEdit) {
+                            onEditClick(property)
+                        } else {
+                            onReserveClick()
+                        }
+                    },
                     shape = RoundedCornerShape(8.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = MainColor),
                     modifier = Modifier.height(44.dp)
                 ) {
-                    Text("Reservar", fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                    Text(
+                        text = if (canEdit) "Editar" else "Reservar",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
                 }
             }
         }

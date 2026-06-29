@@ -9,7 +9,9 @@ data class Hosting(
     val description: String,
     val price: String,
     val status: String = "Publicado",
-    val palette: List<Color>
+    val palette: List<Color>,
+    val id: String = "",
+    val ownerId: String = ""
 )
 
 val SampleHostings = listOf(

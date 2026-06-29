@@ -42,7 +42,8 @@ import com.example.salvadorhome.features.shared.ui.components.ServicesGrid
 fun HostingDetailScreen(
     hosting: Hosting,
     onBack: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onEditClick: (Hosting) -> Unit = {}
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -67,10 +68,12 @@ fun HostingDetailScreen(
                     Text("Servicios incluidos", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
                     ServicesGrid()
                     Button(
-                        onClick = {},
+                        onClick = { onEditClick(hosting) },
                         modifier = Modifier.fillMaxWidth().height(52.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = SalvadorNavy)
-                    ) { Text("Editar publicación") }
+                    ) {
+                        Text("Editar publicación")
+                    }
                 }
             }
     }
