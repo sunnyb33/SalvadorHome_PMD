@@ -11,7 +11,8 @@ data class Hosting(
     val status: String = "Publicado",
     val palette: List<Color>,
     val id: String = "",
-    val ownerId: String = ""
+    val ownerId: String = "",
+    val imageUrls: List<String> = emptyList()
 )
 
 val SampleHostings = listOf(

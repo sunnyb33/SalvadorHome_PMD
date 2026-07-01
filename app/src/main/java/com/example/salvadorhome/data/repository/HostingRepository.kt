@@ -5,11 +5,15 @@ import com.example.salvadorhome.features.shared.model.Hosting
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
+import android.net.Uri
+import com.example.salvadorhome.data.remote.CloudinaryUploader
+import android.content.Context
 
-class HostingRepository {
+class HostingRepository(private val context: Context) {
 
     private val firestore = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
+    private val uploader = CloudinaryUploader(context)
 
     suspend fun getHostings(): Result<List<Hosting>> {
         return try {
@@ -24,6 +28,8 @@ class HostingRepository {
                 val description = document.getString("description") ?: ""
                 val pricePerNight = document.getDouble("pricePerNight") ?: 0.0
                 val ownerId = document.getString("ownerId") ?: ""
+                @Suppress("UNCHECKED_CAST")
+                val imageUrls = document.get("imageUrls") as? List<String> ?: emptyList()
 
                 Hosting(
                     id = document.id,
@@ -32,6 +38,7 @@ class HostingRepository {
                     description = description,
                     price = "$$pricePerNight / noche",
                     ownerId = document.getString("ownerId") ?: "",
+                    imageUrls = imageUrls,
                     palette = listOf(
                         Color(0xFFC2A5E7),
                         Color(0xFF665089)
@@ -46,17 +53,23 @@ class HostingRepository {
         }
     }
 
+    private suspend fun uploadImages(uris: List<Uri>): List<String> {
+        return uris.map { uploader.uploadImage(it) }
+    }
     suspend fun publishHosting(
         title: String,
         location: String,
         description: String,
         pricePerNight: Double,
         capacity: Int,
-        category: String
+        category: String,
+        imageUris: List<Uri> = emptyList()
     ): Result<Boolean> {
         return try {
             val userId = auth.currentUser?.uid
                 ?: return Result.failure(Exception("Usuario no autenticado"))
+
+            val imageUrls = uploadImages(imageUris)
 
             val hostingMap = hashMapOf(
                 "title" to title,
@@ -66,8 +79,10 @@ class HostingRepository {
                 "capacity" to capacity,
                 "category" to category,
                 "ownerId" to userId,
+                "imageUrls" to imageUrls,
                 "createdAt" to System.currentTimeMillis()
             )
+
 
             firestore
                 .collection("Hostings")
@@ -97,6 +112,8 @@ class HostingRepository {
                 val location = document.getString("location") ?: ""
                 val description = document.getString("description") ?: ""
                 val pricePerNight = document.getDouble("pricePerNight") ?: 0.0
+                @Suppress("UNCHECKED_CAST")
+                val imageUrls = document.get("imageUrls") as? List<String> ?: emptyList()
 
                 Hosting(
                     id = document.id,
@@ -105,6 +122,7 @@ class HostingRepository {
                     description = description,
                     price = "$$pricePerNight / noche",
                     ownerId = document.getString("ownerId") ?: "",
+                    imageUrls = imageUrls,
                     palette = listOf(
                         Color(0xFFC2A5E7),
                         Color(0xFF665089)

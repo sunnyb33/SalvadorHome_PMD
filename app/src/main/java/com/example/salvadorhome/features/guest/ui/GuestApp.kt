@@ -9,10 +9,12 @@ import com.example.salvadorhome.features.home.ui.HomeScreen
 import com.example.salvadorhome.features.profile.ui.ProfileScreen
 import com.example.salvadorhome.features.shared.ui.components.SalvadorBottomBar
 import androidx.compose.material3.Scaffold
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.salvadorhome.features.host.ui.screens.HostingDetailScreen
 import com.example.salvadorhome.features.host.ui.screens.PublishHostingScreen
 import com.example.salvadorhome.features.host.viewmodel.HostingViewModel
+import com.example.salvadorhome.features.host.viewmodel.HostingViewModelFactory
 import com.example.salvadorhome.features.profile.ui.HelpSupportScreen
 import com.example.salvadorhome.features.profile.ui.NotificationsScreen
 import com.example.salvadorhome.features.profile.ui.PrivacySecurityScreen
@@ -50,7 +52,9 @@ fun GuestApp(
     var destination by remember {
         mutableStateOf(GuestDestination.HOME)
     }
-    val hostingViewModel: HostingViewModel = viewModel()
+    val context = LocalContext.current
+    val hostingViewModel: HostingViewModel = viewModel(
+        factory = HostingViewModelFactory(context))
 
     var selectedHosting by remember {
         mutableStateOf<Hosting?>(null)
@@ -71,8 +75,10 @@ fun GuestApp(
         mutableStateOf(ProfileSubScreen.NONE)
     }
 
-    LaunchedEffect(Unit) {
-        hostingViewModel.loadHostings()
+    LaunchedEffect(destination) {
+        if (destination == GuestDestination.EXPLORE) {
+            hostingViewModel.loadHostings()
+        }
     }
 
     Scaffold(
@@ -153,7 +159,7 @@ fun GuestApp(
                             onBack = {
                                 destination = GuestDestination.HOME
                             },
-                            onPublish = { title, location, description, pricePerNight, capacity, category ->
+                            onPublish = { title, location, description, pricePerNight, capacity, category, imageUri ->
                                 hostingViewModel.publishHosting(
                                     title = title,
                                     location = location,
@@ -161,6 +167,7 @@ fun GuestApp(
                                     pricePerNight = pricePerNight,
                                     capacity = capacity,
                                     category = category,
+                                    imageUri,
                                     onSuccess = {
                                         destination = GuestDestination.HOME
                                     }

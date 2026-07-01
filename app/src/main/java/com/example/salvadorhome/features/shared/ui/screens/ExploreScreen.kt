@@ -79,11 +79,12 @@ fun ExploreScreen(
             }
         }
         item { Text("Destacados", fontWeight = FontWeight.SemiBold, fontSize = 17.sp) }
-        items(hostings, key = { it.title }) { hosting ->
+        items(hostings, key = { it.id }) { hosting ->
             Column(modifier = Modifier.clickable { onHostingClick(hosting) }) {
                 Box {
                     HostingArtwork(
                         colors = hosting.palette,
+                        imageUrl = hosting.imageUrls.firstOrNull(),
                         modifier = Modifier.fillMaxWidth().aspectRatio(1.75f).clip(RoundedCornerShape(24.dp))
                     )
                     Icon(
