@@ -1,5 +1,6 @@
 package com.example.salvadorhome.features.host.viewmodel
 
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -16,7 +17,7 @@ data class HostingUiState(
 )
 
 class HostingViewModel(
-    private val repository: HostingRepository = HostingRepository()
+    private val repository: HostingRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HostingUiState())
@@ -50,6 +51,7 @@ class HostingViewModel(
         pricePerNight: Double,
         capacity: Int,
         category: String,
+        imageUris: List<Uri>,
         onSuccess: () -> Unit
     ) {
 
@@ -63,7 +65,8 @@ class HostingViewModel(
                 description = description,
                 pricePerNight = pricePerNight,
                 capacity = capacity,
-                category = category
+                category = category,
+                imageUris = imageUris
             )
 
             if (result.isSuccess) {

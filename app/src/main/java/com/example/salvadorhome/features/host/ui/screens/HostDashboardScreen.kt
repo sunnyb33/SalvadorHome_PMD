@@ -78,7 +78,7 @@ fun HostDashboardScreen(
                 Text("+ Nueva", color = SalvadorNavy, fontWeight = FontWeight.Bold, modifier = Modifier.clickable(onClick = onPublishClick))
             }
         }
-        items(hostings, key = { it.title }) { hosting -> HostingRow(hosting) { onHostingClick(hosting) } }
+        items(hostings, key = { it.id }) { hosting -> HostingRow(hosting) { onHostingClick(hosting) } }
         item { Text("Estadísticas", fontSize = 17.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(top = 8.dp)) }
         item { StatisticsCard(hostings.size) }
     }
@@ -102,7 +102,7 @@ private fun HostingRow(hosting: Hosting, onClick: () -> Unit) {
                 Text(hosting.title, fontWeight = FontWeight.SemiBold, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 Text("${hosting.status} · ${hosting.location}", color = SalvadorTextSecondary, fontSize = 11.sp, maxLines = 1)
             }
-            HostingArtwork(hosting.palette, Modifier.width(86.dp).fillMaxHeight())
+            HostingArtwork(hosting.palette, imageUrl = hosting.imageUrls.firstOrNull(),Modifier.width(86.dp).fillMaxHeight())
         }
     }
 }

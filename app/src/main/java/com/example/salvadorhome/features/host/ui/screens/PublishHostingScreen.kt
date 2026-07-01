@@ -55,13 +55,17 @@ import com.example.salvadorhome.core.theme.SalvadorOutline
 import com.example.salvadorhome.core.theme.SalvadorTextSecondary
 import com.example.salvadorhome.features.shared.ui.components.ServicesGrid
 import com.example.salvadorhome.features.shared.ui.components.SalvadorBottomBar
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import android.net.Uri
+import androidx.activity.result.PickVisualMediaRequest
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PublishHostingScreen(
     modifier: Modifier = Modifier,
     onBack: () -> Unit,
-    onPublish: (String, String, String, Double, Int, String) -> Unit
+    onPublish: (String, String, String, Double, Int, String, List<Uri>) -> Unit
 ) {
     var title by remember { mutableStateOf("") }
     var location by remember { mutableStateOf("San Salvador") }
@@ -79,6 +83,10 @@ fun PublishHostingScreen(
         "HOTEL",
         "MONTAÑA"
     )
+    var selectedImages by remember { mutableStateOf<List<Uri>>(emptyList()) }
+    val pickImagesLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickMultipleVisualMedia(maxItems = 5)
+    ) { uris -> selectedImages = uris }
 
     LazyColumn(
         modifier = modifier
@@ -223,7 +231,8 @@ fun PublishHostingScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(100.dp)
-                            .clickable { },
+                            .clickable {pickImagesLauncher.launch(
+                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
                         shape = RoundedCornerShape(12.dp), color = Color.White,
                         border = BorderStroke(1.dp, SalvadorOutline)
                     ) {
@@ -233,10 +242,11 @@ fun PublishHostingScreen(
                         ) {
                             Icon(Icons.Default.AddAPhoto, null)
                             Text(
-                                "Agregar fotografías",
+                                if (selectedImages.isEmpty()) "Agregar fotografías" else "${selectedImages.size} foto(s) seleccionada(s)",
                                 fontSize = 12.sp,
                                 color = SalvadorTextSecondary
                             )
+                            }
                         }
                     }
                     Label("Servicios incluidos")
@@ -261,7 +271,8 @@ fun PublishHostingScreen(
                                 description,
                                 pricePerNight.toDoubleOrNull() ?: 0.0,
                                 capacity.toIntOrNull() ?: 0,
-                                category
+                                category,
+                                selectedImages
                             )
                         },
                         enabled = termsAccepted &&
@@ -279,7 +290,7 @@ fun PublishHostingScreen(
             }
         }
     }
-}
+
 
 @Composable
 private fun Label(text: String) = Text(text, fontWeight = FontWeight.Medium, fontSize = 13.sp)
@@ -301,7 +312,7 @@ private fun PublishHostingScreenPreview() {
             PublishHostingScreen(
                 modifier = Modifier.padding(padding),
                 onBack = {},
-                onPublish = { _, _, _, _, _, _ -> }
+                onPublish = { _, _, _, _, _, _ , _-> }
             )
         }
     }

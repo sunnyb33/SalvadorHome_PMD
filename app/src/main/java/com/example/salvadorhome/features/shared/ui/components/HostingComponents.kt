@@ -27,26 +27,37 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
 import com.example.salvadorhome.core.theme.SalvadorHomeTheme
 import com.example.salvadorhome.core.theme.SalvadorLavender
 
 @Composable
-fun HostingArtwork(colors: List<Color>, modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier.background(
-            Brush.linearGradient(colors.ifEmpty { listOf(Color.Gray, Color.DarkGray) })
-        ),
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            Icons.Default.Apartment,
+fun HostingArtwork(colors: List<Color>, imageUrl: String? = null, modifier: Modifier = Modifier) {
+    if (imageUrl != null) {
+        AsyncImage(
+            model = imageUrl,
             contentDescription = null,
-            tint = Color.White.copy(alpha = .78f),
-            modifier = Modifier.size(56.dp)
+            modifier = modifier,
+            contentScale = ContentScale.Crop
         )
+    } else {
+        Box(
+            modifier = modifier.background(
+                Brush.linearGradient(colors.ifEmpty { listOf(Color.Gray, Color.DarkGray) })
+            ),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                Icons.Default.Apartment,
+                contentDescription = null,
+                tint = Color.White.copy(alpha = .78f),
+                modifier = Modifier.size(56.dp)
+            )
+        }
     }
 }
 

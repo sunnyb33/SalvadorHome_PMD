@@ -44,6 +44,8 @@ import com.example.salvadorhome.features.shared.ui.components.SalvadorBottomBar
 import com.example.salvadorhome.features.shared.ui.screens.ChatScreen
 import com.example.salvadorhome.features.shared.ui.screens.ExploreScreen
 import com.example.salvadorhome.features.shared.ui.screens.MessagesScreen
+import androidx.compose.ui.platform.LocalContext
+import com.example.salvadorhome.features.host.viewmodel.HostingViewModelFactory
 
 private enum class HostDestination { HOME, EXPLORE, MESSAGES, PUBLISH, BOOKINGS, PROFILE }
 
@@ -52,7 +54,10 @@ fun HostApp() {
     var destination by remember { mutableStateOf(HostDestination.HOME) }
     var selectedHosting by remember { mutableStateOf<Hosting?>(null) }
     var selectedConversation by remember { mutableStateOf<Conversation?>(null) }
-    val hostingViewModel: HostingViewModel = viewModel()
+    val context = LocalContext.current
+    val hostingViewModel: HostingViewModel = viewModel(
+        factory = HostingViewModelFactory(context)
+    )
     val hostingState by hostingViewModel.uiState.collectAsState()
     var editingHosting by remember {
         mutableStateOf<Hosting?>(null)
@@ -137,7 +142,7 @@ fun HostApp() {
             HostDestination.PUBLISH -> PublishHostingScreen(
                 Modifier.padding(padding),
                 onBack = { destination = HostDestination.HOME }
-            ) { title, location, description, pricePerNight, capacity, category ->
+            ) { title, location, description, pricePerNight, capacity, category, imageUris ->
 
                 hostingViewModel.publishHosting(
                     title = title,
@@ -146,6 +151,7 @@ fun HostApp() {
                     pricePerNight = pricePerNight,
                     capacity = capacity,
                     category = category,
+                    imageUris = imageUris,
                     onSuccess = {
                         hostingViewModel.loadMyHostings()
                         destination = HostDestination.HOME
@@ -172,8 +178,12 @@ fun HostApp() {
             )
         }
     }
+    LaunchedEffect(hostingState.error) {
+        hostingState.error?.let {
+            android.util.Log.e("PUBLISH_DEBUG", "Error real: $it")
+        }
+    }
 }
-
 @Composable
 private fun EmptySection(title: String, subtitle: String, icon: ImageVector, modifier: Modifier) {
     Column(
