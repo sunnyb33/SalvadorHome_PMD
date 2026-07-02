@@ -172,5 +172,39 @@ class ReservationRepository {
         }
     }
 
+    suspend fun cancelReservation(
+        reservationId: String
+    ): Result<Boolean> {
+        return try {
+            val currentUserId = auth.currentUser?.uid
+                ?: return Result.failure(Exception("Usuario no autenticado"))
+
+            val documentRef = firestore
+                .collection("Reservations")
+                .document(reservationId)
+
+            val document = documentRef.get().await()
+
+            val guestId = document.getString("guestId") ?: ""
+            val ownerId = document.getString("ownerId") ?: ""
+
+            if (currentUserId != guestId && currentUserId != ownerId) {
+                return Result.failure(Exception("No tienes permiso para cancelar esta reserva"))
+            }
+
+            documentRef.update(
+                mapOf(
+                    "status" to "CANCELADA",
+                    "cancelledAt" to System.currentTimeMillis()
+                )
+            ).await()
+
+            Result.success(true)
+
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
 
 }

@@ -191,5 +191,32 @@ class HostingRepository(private val context: Context) {
         }
     }
 
+    suspend fun deleteHosting(
+        hostingId: String
+    ): Result<Boolean> {
+        return try {
+            val currentUserId = auth.currentUser?.uid
+                ?: return Result.failure(Exception("Usuario no autenticado"))
+
+            val documentRef = firestore
+                .collection("Hostings")
+                .document(hostingId)
+
+            val document = documentRef.get().await()
+            val ownerId = document.getString("ownerId") ?: ""
+
+            if (ownerId != currentUserId) {
+                return Result.failure(Exception("No tienes permiso para eliminar esta publicación"))
+            }
+
+            documentRef.delete().await()
+
+            Result.success(true)
+
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
 
 }

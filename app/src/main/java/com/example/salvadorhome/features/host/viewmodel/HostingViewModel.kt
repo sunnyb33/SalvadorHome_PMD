@@ -143,4 +143,21 @@ class HostingViewModel(
         }
     }
 
+    fun deleteHosting(
+        hostingId: String,
+        onSuccess: () -> Unit
+    ) {
+        viewModelScope.launch {
+            val result = repository.deleteHosting(hostingId)
+
+            if (result.isSuccess) {
+                onSuccess()
+            } else {
+                _uiState.value = _uiState.value.copy(
+                    error = result.exceptionOrNull()?.message
+                )
+            }
+        }
+    }
+
 }

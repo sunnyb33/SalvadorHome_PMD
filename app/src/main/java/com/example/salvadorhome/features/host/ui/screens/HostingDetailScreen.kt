@@ -45,7 +45,8 @@ fun HostingDetailScreen(
     hosting: Hosting,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
-    onEditClick: (Hosting) -> Unit = {}
+    onEditClick: (Hosting) -> Unit = {},
+    onDeleteClick: (Hosting) -> Unit = {}
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -82,6 +83,19 @@ fun HostingDetailScreen(
                     ) {
                         Text("Editar publicación")
                     }
+
+                    Button(
+                        onClick = { onDeleteClick(hosting) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(52.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFFD32F2F)
+                        )
+                    ) {
+                        Text("Eliminar publicación")
+                    }
+
                 }
             }
     }

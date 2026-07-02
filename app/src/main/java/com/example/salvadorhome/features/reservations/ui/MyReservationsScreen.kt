@@ -16,6 +16,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BookmarkAdded
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.People
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -88,7 +90,21 @@ fun MyReservationsScreen(
             }
         } else {
             items(state.reservations, key = { it.id }) { reservation ->
-                ReservationCard(reservation = reservation)
+                ReservationCard(
+                    reservation = reservation,
+                    onCancelClick = {
+                        viewModel.cancelReservation(
+                            reservationId = reservation.id,
+                            onSuccess = {
+                                if (isHostMode) {
+                                    viewModel.loadReservationsForMyHostings()
+                                } else {
+                                    viewModel.loadMyReservations()
+                                }
+                            }
+                        )
+                    }
+                )
             }
         }
     }
@@ -96,7 +112,8 @@ fun MyReservationsScreen(
 
 @Composable
 private fun ReservationCard(
-    reservation: Reservation
+    reservation: Reservation,
+    onCancelClick: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -109,18 +126,14 @@ private fun ReservationCard(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     imageVector = Icons.Default.BookmarkAdded,
                     contentDescription = null,
                     tint = Color(0xFF0A1128)
                 )
 
-                Column(
-                    modifier = Modifier.padding(start = 10.dp)
-                ) {
+                Column(modifier = Modifier.padding(start = 10.dp)) {
                     Text(
                         text = reservation.hostingTitle,
                         fontSize = 17.sp,
@@ -161,8 +174,6 @@ private fun ReservationCard(
                 value = reservation.guests.toString()
             )
 
-            Spacer(modifier = Modifier.height(4.dp))
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -185,8 +196,28 @@ private fun ReservationCard(
                 text = reservation.status,
                 fontSize = 12.sp,
                 fontWeight = FontWeight.SemiBold,
-                color = Color(0xFF3357CC)
+                color = if (reservation.status == "CANCELADA")
+                    Color(0xFFD32F2F)
+                else
+                    Color(0xFF3357CC)
             )
+
+            if (reservation.status == "CONFIRMADA") {
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Button(
+                    onClick = onCancelClick,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(46.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFD32F2F)
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Text("Cancelar reserva")
+                }
+            }
         }
     }
 }
