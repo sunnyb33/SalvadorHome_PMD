@@ -130,7 +130,7 @@ fun GuestApp(
                         .replace("/ noche", "")
                         .replace(" ", "")
                         .toDoubleOrNull() ?: 0.0,
-                    maxGuests = 5,
+                    maxGuests = reserving.capacity,
                     cleaningFee = 0.0,
                     serviceFee = 0.0
                 ),

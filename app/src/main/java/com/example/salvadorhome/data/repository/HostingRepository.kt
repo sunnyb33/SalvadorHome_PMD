@@ -28,6 +28,7 @@ class HostingRepository(private val context: Context) {
                 val description = document.getString("description") ?: ""
                 val pricePerNight = document.getDouble("pricePerNight") ?: 0.0
                 val ownerId = document.getString("ownerId") ?: ""
+                val capacity = document.getLong("capacity")?.toInt() ?: 1
 
                 @Suppress("UNCHECKED_CAST")
                 val imageUrls = document.get("imageUrls") as? List<String> ?: emptyList()
@@ -43,6 +44,7 @@ class HostingRepository(private val context: Context) {
                     ownerId = document.getString("ownerId") ?: "",
                     imageUrls = imageUrls,
                     category = category,
+                    capacity = capacity,
                     palette = listOf(
                         Color(0xFFC2A5E7),
                         Color(0xFF665089)
@@ -116,6 +118,7 @@ class HostingRepository(private val context: Context) {
                 val location = document.getString("location") ?: ""
                 val description = document.getString("description") ?: ""
                 val pricePerNight = document.getDouble("pricePerNight") ?: 0.0
+                val capacity = document.getLong("capacity")?.toInt() ?: 1
                 @Suppress("UNCHECKED_CAST")
                 val imageUrls = document.get("imageUrls") as? List<String> ?: emptyList()
 
@@ -130,6 +133,7 @@ class HostingRepository(private val context: Context) {
                     ownerId = document.getString("ownerId") ?: "",
                     imageUrls = imageUrls,
                     category = category,
+                    capacity = capacity,
                     palette = listOf(
                         Color(0xFFC2A5E7),
                         Color(0xFF665089)

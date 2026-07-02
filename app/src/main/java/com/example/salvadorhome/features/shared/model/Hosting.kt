@@ -13,6 +13,7 @@ data class Hosting(
     val id: String = "",
     val ownerId: String = "",
     val category: String = "",
+    val capacity: Int = 1,
     val imageUrls: List<String> = emptyList()
 )
 
