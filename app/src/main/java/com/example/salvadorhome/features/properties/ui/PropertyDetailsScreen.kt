@@ -61,6 +61,7 @@ data class PropertyDetail(
     val highlights: List<String>,
     val reviews: List<ReviewItem>,
     val ownerId: String = "",
+    val imageUrl: String = "",
     val bannerColors: List<Color> = listOf(Color(0xFFD7B28C), Color(0xFF78543C))
 )
 
@@ -71,7 +72,7 @@ data class ReviewItem(
     val rating: Float
 )
 
-//Datos de prueba
+
 private val fakeDetail = PropertyDetail(
     id = "1",
     name = "Cabaña frente al mar",
@@ -161,6 +162,7 @@ private fun ReviewCard(review: ReviewItem) {
 @Composable
 fun PropertyDetailScreen(
     property: PropertyDetail = fakeDetail,
+    userRole: String = "",
     onBackClick: () -> Unit = {},
     onReserveClick: () -> Unit = {},
     onEditClick: (PropertyDetail) -> Unit = {}
@@ -170,6 +172,10 @@ fun PropertyDetailScreen(
     var isFavorite by remember { mutableStateOf(false) }
     val currentUserId = FirebaseAuth.getInstance().currentUser?.uid.orEmpty()
     val canEdit = property.ownerId.isNotBlank() && property.ownerId == currentUserId
+    val canReserve =
+        userRole.equals("Arrendatario", ignoreCase = true) ||
+                userRole.equals("Ambos", ignoreCase = true)
+
 
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -185,6 +191,7 @@ fun PropertyDetailScreen(
             Box(modifier = Modifier.fillMaxWidth().height(220.dp)) {
                 HostingArtwork(
                     colors = property.bannerColors,
+                    imageUrl = property.imageUrl,
                     modifier = Modifier.fillMaxSize()
                 )
 
@@ -403,16 +410,17 @@ fun PropertyDetailScreen(
                     onClick = {
                         if (canEdit) {
                             onEditClick(property)
-                        } else {
+                        } else if (canReserve) {
                             onReserveClick()
                         }
                     },
+                    enabled = canEdit || canReserve,
                     shape = RoundedCornerShape(8.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = MainColor),
                     modifier = Modifier.height(44.dp)
                 ) {
                     Text(
-                        text = if (canEdit) "Editar" else "Reservar",
+                        text = if (canEdit) "Editar publicación" else "Reservar",
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
                         color = Color.White

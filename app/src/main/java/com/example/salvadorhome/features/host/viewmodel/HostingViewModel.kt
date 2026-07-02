@@ -14,6 +14,7 @@ data class HostingUiState(
     val hostings: List<Hosting> = emptyList(),
     val isLoading: Boolean = false,
     val error: String? = null
+
 )
 
 class HostingViewModel(

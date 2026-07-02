@@ -1,7 +1,6 @@
 package com.example.salvadorhome.features.reservations.ui
 
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,16 +22,20 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -44,14 +47,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
+import com.example.salvadorhome.features.reservations.viewmodel.ReservationViewModel
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 data class ReservationProperty(
-    val imageRes: Int,
+    val hostingId: String,
+    val ownerId: String,
+    val imageUrl: String = "",
     val name: String,
     val location: String,
     val pricePerNight: Double,
@@ -146,13 +157,13 @@ private fun PropertySummaryCard(property: ReservationProperty) {
             modifier = Modifier.padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // TODO: reemplazar por AsyncImage cuando haya URLs reales
-            Image(
-                painter = painterResource(id = property.imageRes),
+            AsyncImage(
+                model = property.imageUrl,
                 contentDescription = property.name,
                 modifier = Modifier
                     .size(72.dp)
-                    .clip(RoundedCornerShape(8.dp))
+                    .clip(RoundedCornerShape(8.dp)),
+                contentScale = ContentScale.Crop
             )
 
             Spacer(modifier = Modifier.width(12.dp))
@@ -178,17 +189,19 @@ private fun PropertySummaryCard(property: ReservationProperty) {
 @Composable
 fun ReservationScreen(
     property: ReservationProperty = ReservationProperty(
-        imageRes    = android.R.drawable.ic_menu_gallery,
-        name        = "Nombre del local",
-        location    = "La Libertad, El Salvador",
+        hostingId = "preview-id",
+        ownerId = "preview-owner",
+        imageUrl = "",
+        name = "Nombre del local",
+        location = "La Libertad, El Salvador",
         pricePerNight = 45.0,
-        maxGuests   = 5,
+        maxGuests = 5,
         cleaningFee = 0.0,
-        serviceFee  = 0.0
+        serviceFee = 0.0
     ),
     onBackClick: () -> Unit = {},
-    onReservationConfirmed: () -> Unit = {}
-    // viewModel: ReservationViewModel = viewModel()
+    onReservationConfirmed: () -> Unit = {},
+    viewModel: ReservationViewModel = viewModel()
 ) {
     val MainColor     = Color(0xFF0A1128)
     val LavenderColor = Color(0xFFE8E8F8)
@@ -197,7 +210,41 @@ fun ReservationScreen(
     var checkIn     by remember { mutableStateOf("") }
     var checkOut    by remember { mutableStateOf("") }
     var guestCount  by remember { mutableIntStateOf(0) }
+    var showCheckInPicker by remember { mutableStateOf(false) }
+    var showCheckOutPicker by remember { mutableStateOf(false) }
 
+    val checkInPickerState = rememberDatePickerState()
+    val checkOutPickerState = rememberDatePickerState()
+
+    fun formatDate(millis: Long?): String {
+        if (millis == null) return ""
+        val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        return formatter.format(Date(millis))
+    }
+
+
+    val state by viewModel.uiState.collectAsState()
+
+    fun parseDateToMillis(date: String): Long? {
+        return try {
+            val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            formatter.parse(date)?.time
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    val checkInMillis = parseDateToMillis(checkIn)
+    val checkOutMillis = parseDateToMillis(checkOut)
+
+    val nights = if (checkInMillis != null && checkOutMillis != null) {
+        viewModel.calculateNights(checkInMillis, checkOutMillis)
+    } else {
+        0
+    }
+
+    val subtotal = nights * property.pricePerNight
+    val total = subtotal + property.cleaningFee + property.serviceFee
 
     val currentStep by remember {
         derivedStateOf {
@@ -208,11 +255,6 @@ fun ReservationScreen(
             }
         }
     }
-
- //datos quemados de muestra
-    val nights = 2
-    val subtotal   = nights * property.pricePerNight
-    val total      = subtotal + property.cleaningFee + property.serviceFee
 
     Column(
         modifier = Modifier
@@ -263,31 +305,47 @@ fun ReservationScreen(
                 )
                 Spacer(modifier = Modifier.height(12.dp))
 
-                Text(text = "Check-In", fontSize = 13.sp, color = Color.Gray)
-                Spacer(modifier = Modifier.height(6.dp))
-                OutlinedTextField(
-                    value = checkIn,
-                    onValueChange = { checkIn = it },
-                    placeholder = { Text("mm/dd/yyyy") },
-                    //Cuando la logica este cambiarlo uwu
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    shape = RoundedCornerShape(8.dp)
+                Text(
+                    text = "Check-In",
+                    fontSize = 13.sp,
+                    color = Color.Gray
                 )
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                Button(
+                    onClick = { showCheckInPicker = true },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        if (checkIn.isBlank())
+                            "Seleccionar fecha"
+                        else
+                            checkIn
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                Text(text = "Check-Out", fontSize = 13.sp, color = Color.Gray)
-                Spacer(modifier = Modifier.height(6.dp))
-                OutlinedTextField(
-                    value = checkOut,
-                    onValueChange = { checkOut = it },
-                    placeholder = { Text("mm/dd/yyyy") },
-                    // Cambiar por DatePickerDialog cuando se integre
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    shape = RoundedCornerShape(8.dp)
+                Text(
+                    text = "Check-Out",
+                    fontSize = 13.sp,
+                    color = Color.Gray
                 )
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                Button(
+                    onClick = { showCheckOutPicker = true },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        if (checkOut.isBlank())
+                            "Seleccionar fecha"
+                        else
+                            checkOut
+                    )
+                }
             }
 
             Column {
@@ -409,8 +467,24 @@ fun ReservationScreen(
             color = Color.White
         ) {
             Button(
-                onClick = onReservationConfirmed,
-                enabled = currentStep == 3,
+                onClick = {
+                    if (checkInMillis != null && checkOutMillis != null) {
+                        viewModel.createReservation(
+                            hostingId = property.hostingId,
+                            hostingTitle = property.name,
+                            hostingLocation = property.location,
+                            ownerId = property.ownerId,
+                            checkInMillis = checkInMillis,
+                            checkOutMillis = checkOutMillis,
+                            guests = guestCount,
+                            pricePerNight = property.pricePerNight,
+                            cleaningFee = property.cleaningFee,
+                            serviceFee = property.serviceFee,
+                            onSuccess = onReservationConfirmed
+                        )
+                    }
+                },
+                enabled = currentStep == 3 && nights > 0 && !state.isLoading,
                 shape = RoundedCornerShape(8.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor         = MainColor,
@@ -420,7 +494,10 @@ fun ReservationScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp, vertical = 12.dp)
                     .height(48.dp)
-            ) {
+            )
+
+
+            {
                 Text(
                     text = if (currentStep < 3) "Continuar" else "Confirmar reserva",
                     fontSize = 15.sp,
@@ -430,4 +507,70 @@ fun ReservationScreen(
             }
         }
     }
+
+    if (state.error != null) {
+        AlertDialog(
+            onDismissRequest = {
+                viewModel.resetState()
+            },
+            title = {
+                Text("No se pudo reservar")
+            },
+            text = {
+                Text(state.error ?: "Ocurrió un error")
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        viewModel.resetState()
+                    }
+                ) {
+                    Text("Aceptar")
+                }
+            }
+        )
+    }
+
+    if (showCheckInPicker) {
+
+        DatePickerDialog(
+            onDismissRequest = {
+                showCheckInPicker = false
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        checkIn = formatDate(checkInPickerState.selectedDateMillis)
+                        showCheckInPicker = false
+                    }
+                ) {
+                    Text("Aceptar")
+                }
+            }
+        ) {
+            DatePicker(state = checkInPickerState)
+        }
+    }
+
+    if (showCheckOutPicker) {
+
+        DatePickerDialog(
+            onDismissRequest = {
+                showCheckOutPicker = false
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        checkOut = formatDate(checkOutPickerState.selectedDateMillis)
+                        showCheckOutPicker = false
+                    }
+                ) {
+                    Text("Aceptar")
+                }
+            }
+        ) {
+            DatePicker(state = checkOutPickerState)
+        }
+    }
+
 }

@@ -3,6 +3,7 @@ package com.example.salvadorhome.features.shared.ui.screens
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -46,8 +48,6 @@ import com.example.salvadorhome.features.shared.model.Hosting
 import com.example.salvadorhome.features.shared.model.SampleHostings
 import com.example.salvadorhome.features.shared.ui.components.HostingArtwork
 import com.example.salvadorhome.features.shared.ui.components.SalvadorBottomBar
-
-/** Pantalla disponible para huésped y arrendador. */
 @Composable
 fun ExploreScreen(
     hostings: List<Hosting>,
@@ -55,6 +55,16 @@ fun ExploreScreen(
     onHostingClick: (Hosting) -> Unit
 ) {
     var selectedFilter by remember { mutableStateOf("Todos") }
+
+    val filteredHostings = remember(selectedFilter, hostings) {
+        when (selectedFilter) {
+            "Todos" -> hostings
+            else -> hostings.filter {
+                it.category.equals(selectedFilter, ignoreCase = true)
+            }
+        }
+    }
+
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(horizontal = 20.dp, vertical = 18.dp),
@@ -62,50 +72,120 @@ fun ExploreScreen(
     ) {
         item {
             Text("Bienvenido", fontSize = 24.sp, fontWeight = FontWeight.Bold)
-            Text("¿A dónde deseas hospedarte?", color = SalvadorTextSecondary, fontSize = 13.sp)
+            Text(
+                "¿A dónde deseas hospedarte?",
+                color = SalvadorTextSecondary,
+                fontSize = 13.sp
+            )
         }
+
         item {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                listOf("Todos", "Playa", "Naturaleza", "Hotel").forEach { filter ->
+            Row(
+                modifier = Modifier.horizontalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            )  {
+                listOf(
+                    "Todos",
+                    "Playa",
+                    "Naturaleza",
+                    "Hotel",
+                    "Montaña"
+                ).forEach { filter ->
+
                     Surface(
-                        color = if (selectedFilter == filter) SalvadorLavender else Color.Transparent,
+                        color = if (selectedFilter == filter)
+                            SalvadorLavender
+                        else
+                            Color.Transparent,
                         shape = RoundedCornerShape(50),
                         border = BorderStroke(1.dp, SalvadorOutline),
-                        modifier = Modifier.clickable { selectedFilter = filter }
+                        modifier = Modifier.clickable {
+                            selectedFilter = filter
+                        }
                     ) {
-                        Text(filter, fontSize = 12.sp, modifier = Modifier.padding(horizontal = 13.dp, vertical = 7.dp))
+                        Text(
+                            text = filter,
+                            fontSize = 12.sp,
+                            modifier = Modifier.padding(
+                                horizontal = 13.dp,
+                                vertical = 7.dp
+                            )
+                        )
                     }
                 }
             }
         }
-        item { Text("Destacados", fontWeight = FontWeight.SemiBold, fontSize = 17.sp) }
-        items(hostings, key = { it.id }) { hosting ->
-            Column(modifier = Modifier.clickable { onHostingClick(hosting) }) {
+
+        item {
+            Text(
+                "Destacados",
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 17.sp
+            )
+        }
+
+        items(filteredHostings, key = { it.id }) { hosting ->
+            Column(
+                modifier = Modifier.clickable {
+                    onHostingClick(hosting)
+                }
+            ) {
+
                 Box {
                     HostingArtwork(
                         colors = hosting.palette,
                         imageUrl = hosting.imageUrls.firstOrNull(),
-                        modifier = Modifier.fillMaxWidth().aspectRatio(1.75f).clip(RoundedCornerShape(24.dp))
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(1.75f)
+                            .clip(RoundedCornerShape(24.dp))
                     )
+
                     Icon(
                         Icons.Default.FavoriteBorder,
                         contentDescription = "Guardar",
                         tint = Color.White,
-                        modifier = Modifier.align(Alignment.TopEnd).padding(14.dp)
-                            .background(Color.Black.copy(alpha = .25f), CircleShape).padding(7.dp)
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(14.dp)
+                            .background(
+                                Color.Black.copy(alpha = .25f),
+                                CircleShape
+                            )
+                            .padding(7.dp)
                     )
                 }
+
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(top = 9.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 9.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("${hosting.title} · ${hosting.location}", fontWeight = FontWeight.SemiBold)
-                        Text(hosting.price, color = SalvadorTextSecondary, fontSize = 13.sp)
+                        Text(
+                            "${hosting.title} · ${hosting.location}",
+                            fontWeight = FontWeight.SemiBold
+                        )
+
+                        Text(
+                            hosting.price,
+                            color = SalvadorTextSecondary,
+                            fontSize = 13.sp
+                        )
                     }
-                    Icon(Icons.Default.StarBorder, contentDescription = null)
+
+                    Icon(
+                        Icons.Default.StarBorder,
+                        contentDescription = null
+                    )
                 }
-                HorizontalDivider(modifier = Modifier.padding(top = 12.dp), color = SalvadorOutline)
+
+                HorizontalDivider(
+                    modifier = Modifier.padding(top = 12.dp),
+                    color = SalvadorOutline
+                )
             }
         }
     }
