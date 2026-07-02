@@ -20,6 +20,7 @@ import com.example.salvadorhome.features.auth.viewmodel.AuthState
 import com.example.salvadorhome.features.auth.viewmodel.AuthViewModel
 import com.example.salvadorhome.features.auth.viewmodel.AuthViewModelFactory
 import com.example.salvadorhome.features.guest.ui.GuestApp
+import com.google.firebase.auth.FirebaseAuth // NUEVO: Importación para Firebase
 
 @Composable
 fun AppNavigation() {
@@ -127,6 +128,14 @@ fun AppNavigation() {
                 userRole = currentRole,
                 onHostClick = {
                     navController.navigate(Routes.Host.route)
+                },
+                onLogout = { //Lógica para cerrar sesión
+                    FirebaseAuth.getInstance().signOut()
+                    navController.navigate(Routes.Welcome.route) {
+                        popUpTo(0) {
+                            inclusive = true // Limpia el historial para que no pueda dar "Atrás"
+                        }
+                    }
                 }
             )
         }

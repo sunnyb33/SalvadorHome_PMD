@@ -47,7 +47,8 @@ private enum class ProfileSubScreen {
 @Composable
 fun GuestApp(
     userRole: String = "",
-    onHostClick: () -> Unit = {}
+    onHostClick: () -> Unit = {},
+    onLogout: () -> Unit = {} // NUEVO: Puente para cerrar sesión
 ) {
     var destination by remember {
         mutableStateOf(GuestDestination.HOME)
@@ -259,11 +260,12 @@ fun GuestApp(
                             },
                             onHelp = {
                                 profileSubScreen = ProfileSubScreen.HELP
-                            }
+                            },
+                            onLogout = onLogout // NUEVO: Conectamos la acción al perfil
                         )
                     }
                 }
             }
         }
     }
-    }
+}
