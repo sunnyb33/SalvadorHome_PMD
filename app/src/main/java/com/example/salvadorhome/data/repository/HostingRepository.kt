@@ -28,8 +28,11 @@ class HostingRepository(private val context: Context) {
                 val description = document.getString("description") ?: ""
                 val pricePerNight = document.getDouble("pricePerNight") ?: 0.0
                 val ownerId = document.getString("ownerId") ?: ""
+
                 @Suppress("UNCHECKED_CAST")
                 val imageUrls = document.get("imageUrls") as? List<String> ?: emptyList()
+
+                val category = document.getString("category") ?: ""
 
                 Hosting(
                     id = document.id,
@@ -39,6 +42,7 @@ class HostingRepository(private val context: Context) {
                     price = "$$pricePerNight / noche",
                     ownerId = document.getString("ownerId") ?: "",
                     imageUrls = imageUrls,
+                    category = category,
                     palette = listOf(
                         Color(0xFFC2A5E7),
                         Color(0xFF665089)
@@ -115,6 +119,8 @@ class HostingRepository(private val context: Context) {
                 @Suppress("UNCHECKED_CAST")
                 val imageUrls = document.get("imageUrls") as? List<String> ?: emptyList()
 
+                val category = document.getString("category") ?: ""
+
                 Hosting(
                     id = document.id,
                     title = title,
@@ -123,6 +129,7 @@ class HostingRepository(private val context: Context) {
                     price = "$$pricePerNight / noche",
                     ownerId = document.getString("ownerId") ?: "",
                     imageUrls = imageUrls,
+                    category = category,
                     palette = listOf(
                         Color(0xFFC2A5E7),
                         Color(0xFF665089)

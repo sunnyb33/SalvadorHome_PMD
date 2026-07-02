@@ -12,6 +12,7 @@ data class Hosting(
     val palette: List<Color>,
     val id: String = "",
     val ownerId: String = "",
+    val category: String = "",
     val imageUrls: List<String> = emptyList()
 )
 

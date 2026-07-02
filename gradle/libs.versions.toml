@@ -19,6 +19,7 @@ navigationCompose = "2.9.3"
 googleServices = "4.4.1"
 firebaseBom = "32.8.0"
 firebaseCrashlyticsBuildtools = "3.0.7"
+foundation = "1.11.3"
 
 
 
@@ -53,6 +54,7 @@ firebase-auth = { group = "com.google.firebase", name = "firebase-auth-ktx" }
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore-ktx" }
 firebase-storage = { group = "com.google.firebase", name = "firebase-storage-ktx" }
 firebase-crashlytics-buildtools = { group = "com.google.firebase", name = "firebase-crashlytics-buildtools", version.ref = "firebaseCrashlyticsBuildtools" }
+androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

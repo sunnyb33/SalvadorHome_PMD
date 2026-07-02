@@ -56,7 +56,9 @@ fun HostingDetailScreen(
                     HostingArtwork(
                         colors = hosting.palette,
                         imageUrl = hosting.imageUrls.firstOrNull(),
-                        modifier = Modifier.width(86.dp).fillMaxHeight()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(310.dp)
                     )
                     IconButton(onClick = onBack, modifier = Modifier.padding(16.dp).background(Color.White.copy(.9f), CircleShape)) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, "Volver")

@@ -1,6 +1,5 @@
 package com.example.salvadorhome.features.guest.ui
 
-import android.R
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.*
@@ -9,21 +8,22 @@ import com.example.salvadorhome.features.home.ui.HomeScreen
 import com.example.salvadorhome.features.profile.ui.ProfileScreen
 import com.example.salvadorhome.features.shared.ui.components.SalvadorBottomBar
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.salvadorhome.features.host.ui.screens.HostingDetailScreen
 import com.example.salvadorhome.features.host.ui.screens.PublishHostingScreen
 import com.example.salvadorhome.features.host.viewmodel.HostingViewModel
 import com.example.salvadorhome.features.host.viewmodel.HostingViewModelFactory
 import com.example.salvadorhome.features.profile.ui.HelpSupportScreen
 import com.example.salvadorhome.features.profile.ui.NotificationsScreen
 import com.example.salvadorhome.features.profile.ui.PrivacySecurityScreen
+import com.example.salvadorhome.features.properties.ui.PropertyDetail
+import com.example.salvadorhome.features.properties.ui.PropertyDetailScreen
 import com.example.salvadorhome.features.reservations.ui.ReservationProperty
 import com.example.salvadorhome.features.reservations.ui.ReservationScreen
 import com.example.salvadorhome.features.shared.model.Conversation
 import com.example.salvadorhome.features.shared.model.Hosting
 import com.example.salvadorhome.features.shared.model.SampleConversations
-import com.example.salvadorhome.features.shared.model.SampleHostings
 import com.example.salvadorhome.features.shared.ui.screens.ChatScreen
 import com.example.salvadorhome.features.shared.ui.screens.ExploreScreen
 import com.example.salvadorhome.features.shared.ui.screens.MessagesScreen
@@ -54,17 +54,17 @@ fun GuestApp(
     }
     val context = LocalContext.current
     val hostingViewModel: HostingViewModel = viewModel(
-        factory = HostingViewModelFactory(context))
+        factory = HostingViewModelFactory(context)
+    )
 
     var selectedHosting by remember {
         mutableStateOf<Hosting?>(null)
     }
 
-    val hostings = remember {
-        mutableStateListOf<Hosting>().apply {
-            addAll(SampleHostings)
-        }
+    var reservingHosting by remember {
+        mutableStateOf<Hosting?>(null)
     }
+
     var selectedConversation by remember {
         mutableStateOf<Conversation?>(null)
     }
@@ -75,6 +75,10 @@ fun GuestApp(
         mutableStateOf(ProfileSubScreen.NONE)
     }
 
+    LaunchedEffect(Unit) {
+        hostingViewModel.loadHostings()
+    }
+
     LaunchedEffect(destination) {
         if (destination == GuestDestination.EXPLORE) {
             hostingViewModel.loadHostings()
@@ -83,35 +87,95 @@ fun GuestApp(
 
     Scaffold(
         bottomBar = {
-            SalvadorBottomBar(
-                selectedIndex = destination.ordinal,
-                onItemSelected = { index ->
-                    selectedHosting = null
-                    selectedConversation = null
-                    profileSubScreen = ProfileSubScreen.NONE
-                    destination = GuestDestination.entries[index]
-                }
-            )
+            if (
+                selectedHosting == null &&
+                reservingHosting == null &&
+                selectedConversation == null &&
+                profileSubScreen == ProfileSubScreen.NONE
+            ) {
+                SalvadorBottomBar(
+                    selectedIndex = destination.ordinal,
+                    onItemSelected = { index ->
+                        selectedHosting = null
+                        selectedConversation = null
+                        reservingHosting = null
+                        profileSubScreen = ProfileSubScreen.NONE
+                        destination = GuestDestination.entries[index]
+                    }
+                )
+            }
         }
     ) { padding ->
 
         val detail = selectedHosting
         val conversation = selectedConversation
+        val reserving = reservingHosting
 
-        if (detail != null) {
-            HostingDetailScreen(
-                hosting = detail,
-                onBack = { selectedHosting = null },
-                modifier = Modifier.padding(padding)
+        if (reserving != null) {
+            ReservationScreen(
+                property = ReservationProperty(
+                    hostingId = reserving.id,
+                    ownerId = reserving.ownerId,
+                    imageUrl = reserving.imageUrls.firstOrNull() ?: "",
+                    name = reserving.title,
+                    location = reserving.location,
+                    pricePerNight = reserving.price
+                        .replace("$", "")
+                        .replace("/ noche", "")
+                        .replace(" ", "")
+                        .toDoubleOrNull() ?: 0.0,
+                    maxGuests = 5,
+                    cleaningFee = 0.0,
+                    serviceFee = 0.0
+                ),
+                onBackClick = {
+                    reservingHosting = null
+                },
+                onReservationConfirmed = {
+                    reservingHosting = null
+                    destination = GuestDestination.BOOKINGS
+                }
             )
+
+        } else if (detail != null) {
+            PropertyDetailScreen(
+                property = PropertyDetail(
+                    id = detail.id,
+                    name = detail.title,
+                    isCertified = true,
+                    rating = 5.0f,
+                    ownerName = "Propietario",
+                    ownerRating = "Arrendador verificado",
+                    pricePerNight = detail.price
+                        .replace("$", "")
+                        .replace("/ noche", "")
+                        .replace(" ", "")
+                        .toDoubleOrNull() ?: 0.0,
+                    priceDescription = "Tarifa base por noche.",
+                    description = detail.description,
+                    highlights = listOf("Hospedaje publicado en SalvadorHouse"),
+                    reviews = emptyList(),
+                    ownerId = detail.ownerId,
+                    imageUrl = detail.imageUrls.firstOrNull() ?: "",
+                    bannerColors = detail.palette
+                ),
+                userRole = userRole,
+                onBackClick = {
+                    selectedHosting = null
+                },
+                onReserveClick = {
+                    reservingHosting = detail
+                }
+            )
+
         } else if (conversation != null) {
             ChatScreen(
                 conversation = conversation,
                 modifier = Modifier.padding(padding),
                 onBack = { selectedConversation = null }
             )
-        } else {
 
+        } else {
             when (profileSubScreen) {
                 ProfileSubScreen.NOTIFICATIONS -> NotificationsScreen(
                     onBackClick = { profileSubScreen = ProfileSubScreen.NONE }
@@ -126,13 +190,15 @@ fun GuestApp(
                 )
 
                 ProfileSubScreen.NONE -> {
-
-
                     when (destination) {
                         GuestDestination.HOME -> HomeScreen(
                             modifier = Modifier.padding(padding),
+                            hostings = hostingState.hostings,
                             userRole = userRole,
-                            onHostClick = onHostClick
+                            onHostClick = onHostClick,
+                            onHostingClick = { hosting ->
+                                selectedHosting = hosting
+                            }
                         )
 
                         GuestDestination.EXPLORE -> ExploreScreen(
@@ -159,7 +225,8 @@ fun GuestApp(
                             onBack = {
                                 destination = GuestDestination.HOME
                             },
-                            onPublish = { title, location, description, pricePerNight, capacity, category, imageUri ->
+                            onPublish = { title, location, description, pricePerNight, capacity, category, imageUris ->
+
                                 hostingViewModel.publishHosting(
                                     title = title,
                                     location = location,
@@ -167,8 +234,9 @@ fun GuestApp(
                                     pricePerNight = pricePerNight,
                                     capacity = capacity,
                                     category = category,
-                                    imageUri,
+                                    imageUris = imageUris,
                                     onSuccess = {
+                                        hostingViewModel.loadHostings()
                                         destination = GuestDestination.HOME
                                     }
                                 )
@@ -178,23 +246,7 @@ fun GuestApp(
                         GuestDestination.BOOKINGS -> Box(
                             modifier = Modifier.padding(padding)
                         ) {
-                            ReservationScreen(
-                                property = ReservationProperty(
-                                    imageRes = R.drawable.ic_menu_gallery,
-                                    name = "Nombre del local",
-                                    location = "La Libertad, El Salvador",
-                                    pricePerNight = 45.0,
-                                    maxGuests = 5,
-                                    cleaningFee = 0.0,
-                                    serviceFee = 0.0
-                                ),
-                                onBackClick = {
-                                    destination = GuestDestination.HOME
-                                },
-                                onReservationConfirmed = {
-                                    destination = GuestDestination.HOME
-                                }
-                            )
+                            Text("Reservas pendientes")
                         }
 
                         GuestDestination.PROFILE -> ProfileScreen(
@@ -214,4 +266,4 @@ fun GuestApp(
             }
         }
     }
-}
+    }
