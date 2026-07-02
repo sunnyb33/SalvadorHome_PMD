@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -79,12 +80,13 @@ fun RegisterScreenContent(
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.Top,
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(32.dp, 38.dp)
             .background(Color(0xFFF8F9FA))
+            .imePadding()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 32.dp, vertical = 38.dp)
     ) {
         Text(
             text = "¡Bienvenido!",
@@ -94,7 +96,7 @@ fun RegisterScreenContent(
             color = TextColor
         )
 
-        Spacer(modifier = Modifier.height(45.dp))
+        Spacer(modifier = Modifier.height(28.dp))
 
         OutlinedTextField(
             value = nombre,
@@ -151,6 +153,7 @@ fun RegisterScreenContent(
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             modifier = Modifier.fillMaxWidth(),
+            singleLine = true,
             isError = errorMessage != null
         )
 

@@ -46,6 +46,7 @@ import com.example.salvadorhome.features.shared.ui.screens.ExploreScreen
 import com.example.salvadorhome.features.shared.ui.screens.MessagesScreen
 import androidx.compose.ui.platform.LocalContext
 import com.example.salvadorhome.features.host.viewmodel.HostingViewModelFactory
+import com.example.salvadorhome.features.reservations.ui.MyReservationsScreen
 
 private enum class HostDestination { HOME, EXPLORE, MESSAGES, PUBLISH, BOOKINGS, PROFILE }
 
@@ -70,6 +71,7 @@ fun HostApp() {
             if (editingHosting == null && selectedHosting == null && selectedConversation == null) {
                 SalvadorBottomBar(
                     selectedIndex = destination.ordinal,
+                    showExplore = false,
                     onItemSelected = { index ->
                         selectedHosting = null
                         selectedConversation = null
@@ -166,11 +168,9 @@ fun HostApp() {
                 onConversationClick = { selectedConversation = it }
             )
 
-            HostDestination.BOOKINGS -> EmptySection(
-                "Reservas",
-                "Administra las solicitudes y próximas estadías.",
-                Icons.Default.Bed,
-                Modifier.padding(padding)
+            HostDestination.BOOKINGS -> MyReservationsScreen(
+                modifier = Modifier.padding(padding),
+                isHostMode = true
             )
 
             HostDestination.PROFILE -> ProfileScreen(
