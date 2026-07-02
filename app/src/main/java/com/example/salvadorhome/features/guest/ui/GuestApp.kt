@@ -1,6 +1,5 @@
 package com.example.salvadorhome.features.guest.ui
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -8,7 +7,6 @@ import com.example.salvadorhome.features.home.ui.HomeScreen
 import com.example.salvadorhome.features.profile.ui.ProfileScreen
 import com.example.salvadorhome.features.shared.ui.components.SalvadorBottomBar
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.salvadorhome.features.host.ui.screens.PublishHostingScreen
@@ -19,6 +17,7 @@ import com.example.salvadorhome.features.profile.ui.NotificationsScreen
 import com.example.salvadorhome.features.profile.ui.PrivacySecurityScreen
 import com.example.salvadorhome.features.properties.ui.PropertyDetail
 import com.example.salvadorhome.features.properties.ui.PropertyDetailScreen
+import com.example.salvadorhome.features.reservations.ui.MyReservationsScreen
 import com.example.salvadorhome.features.reservations.ui.ReservationProperty
 import com.example.salvadorhome.features.reservations.ui.ReservationScreen
 import com.example.salvadorhome.features.shared.model.Conversation
@@ -48,7 +47,7 @@ private enum class ProfileSubScreen {
 fun GuestApp(
     userRole: String = "",
     onHostClick: () -> Unit = {},
-    onLogout: () -> Unit = {} // NUEVO: Puente para cerrar sesión
+    onLogout: () -> Unit = {}
 ) {
     var destination by remember {
         mutableStateOf(GuestDestination.HOME)
@@ -96,11 +95,17 @@ fun GuestApp(
             ) {
                 SalvadorBottomBar(
                     selectedIndex = destination.ordinal,
+                    showPublish = !userRole.equals("Arrendatario", ignoreCase = true),
                     onItemSelected = { index ->
-                        selectedHosting = null
+                    selectedHosting = null
                         selectedConversation = null
                         reservingHosting = null
                         profileSubScreen = ProfileSubScreen.NONE
+
+                        if (index == 3 && userRole.equals("Arrendatario", ignoreCase = true)) {
+                            return@SalvadorBottomBar
+                        }
+
                         destination = GuestDestination.entries[index]
                     }
                 )
@@ -244,11 +249,9 @@ fun GuestApp(
                             }
                         )
 
-                        GuestDestination.BOOKINGS -> Box(
+                        GuestDestination.BOOKINGS -> MyReservationsScreen(
                             modifier = Modifier.padding(padding)
-                        ) {
-                            Text("Reservas pendientes")
-                        }
+                        )
 
                         GuestDestination.PROFILE -> ProfileScreen(
                             modifier = Modifier.padding(padding),
@@ -261,7 +264,7 @@ fun GuestApp(
                             onHelp = {
                                 profileSubScreen = ProfileSubScreen.HELP
                             },
-                            onLogout = onLogout // NUEVO: Conectamos la acción al perfil
+                            onLogout = onLogout
                         )
                     }
                 }

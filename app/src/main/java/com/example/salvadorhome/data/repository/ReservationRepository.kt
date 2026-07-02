@@ -95,4 +95,82 @@ class ReservationRepository {
             checkInMillis < existingCheckOut && checkOutMillis > existingCheckIn
         }
     }
+
+    suspend fun getMyReservations(): Result<List<Reservation>> {
+        return try {
+            val guestId = auth.currentUser?.uid
+                ?: return Result.failure(Exception("Usuario no autenticado"))
+
+            val snapshot = firestore.collection("Reservations")
+                .whereEqualTo("guestId", guestId)
+                .get()
+                .await()
+
+            val reservations = snapshot.documents.map { document ->
+                Reservation(
+                    id = document.id,
+                    hostingId = document.getString("hostingId") ?: "",
+                    hostingTitle = document.getString("hostingTitle") ?: "",
+                    hostingLocation = document.getString("hostingLocation") ?: "",
+                    ownerId = document.getString("ownerId") ?: "",
+                    guestId = document.getString("guestId") ?: "",
+                    checkInMillis = document.getLong("checkInMillis") ?: 0L,
+                    checkOutMillis = document.getLong("checkOutMillis") ?: 0L,
+                    guests = document.getLong("guests")?.toInt() ?: 1,
+                    nights = document.getLong("nights")?.toInt() ?: 0,
+                    pricePerNight = document.getDouble("pricePerNight") ?: 0.0,
+                    cleaningFee = document.getDouble("cleaningFee") ?: 0.0,
+                    serviceFee = document.getDouble("serviceFee") ?: 0.0,
+                    total = document.getDouble("total") ?: 0.0,
+                    status = document.getString("status") ?: "CONFIRMADA",
+                    createdAt = document.getLong("createdAt") ?: 0L
+                )
+            }
+
+            Result.success(reservations)
+
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getReservationsForMyHostings(): Result<List<Reservation>> {
+        return try {
+            val ownerId = auth.currentUser?.uid
+                ?: return Result.failure(Exception("Usuario no autenticado"))
+
+            val snapshot = firestore.collection("Reservations")
+                .whereEqualTo("ownerId", ownerId)
+                .get()
+                .await()
+
+            val reservations = snapshot.documents.map { document ->
+                Reservation(
+                    id = document.id,
+                    hostingId = document.getString("hostingId") ?: "",
+                    hostingTitle = document.getString("hostingTitle") ?: "",
+                    hostingLocation = document.getString("hostingLocation") ?: "",
+                    ownerId = document.getString("ownerId") ?: "",
+                    guestId = document.getString("guestId") ?: "",
+                    checkInMillis = document.getLong("checkInMillis") ?: 0L,
+                    checkOutMillis = document.getLong("checkOutMillis") ?: 0L,
+                    guests = document.getLong("guests")?.toInt() ?: 1,
+                    nights = document.getLong("nights")?.toInt() ?: 0,
+                    pricePerNight = document.getDouble("pricePerNight") ?: 0.0,
+                    cleaningFee = document.getDouble("cleaningFee") ?: 0.0,
+                    serviceFee = document.getDouble("serviceFee") ?: 0.0,
+                    total = document.getDouble("total") ?: 0.0,
+                    status = document.getString("status") ?: "CONFIRMADA",
+                    createdAt = document.getLong("createdAt") ?: 0L
+                )
+            }
+
+            Result.success(reservations)
+
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+
 }

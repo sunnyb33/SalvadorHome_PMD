@@ -48,7 +48,9 @@ val SalvadorBottomBarItems = listOf(
 fun SalvadorBottomBar(
     selectedIndex: Int,
     onItemSelected: (Int) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    showPublish: Boolean = true,
+    showExplore: Boolean = true
 ) {
     Box(
         modifier = modifier
@@ -56,6 +58,14 @@ fun SalvadorBottomBar(
             .navigationBarsPadding()
             .padding(horizontal = 12.dp, vertical = 8.dp)
     ) {
+
+        val visibleItems = SalvadorBottomBarItems.filter { item ->
+            val publishOk = showPublish || item.label != "Publicar"
+            val exploreOk = showExplore || item.label != "Explorar"
+
+            publishOk && exploreOk
+        }
+
         NavigationBar(
             modifier = Modifier
                 .fillMaxWidth()
@@ -64,10 +74,11 @@ fun SalvadorBottomBar(
             containerColor = SalvadorLavender,
             tonalElevation = 0.dp
         ) {
-            SalvadorBottomBarItems.forEachIndexed { index, item ->
+            visibleItems.forEach { item ->
+                val realIndex = SalvadorBottomBarItems.indexOf(item)
                 NavigationBarItem(
-                    selected = selectedIndex == index,
-                    onClick = { onItemSelected(index) },
+                    selected = selectedIndex == realIndex,
+                    onClick = { onItemSelected(realIndex) },
                     icon = {
                         Icon(
                             imageVector = item.icon,
