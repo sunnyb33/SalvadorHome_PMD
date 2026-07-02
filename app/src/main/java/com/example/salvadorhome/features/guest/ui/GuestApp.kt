@@ -95,17 +95,12 @@ fun GuestApp(
             ) {
                 SalvadorBottomBar(
                     selectedIndex = destination.ordinal,
-                    showPublish = !userRole.equals("Arrendatario", ignoreCase = true),
+                    showPublish = false,
                     onItemSelected = { index ->
-                    selectedHosting = null
+                        selectedHosting = null
                         selectedConversation = null
                         reservingHosting = null
                         profileSubScreen = ProfileSubScreen.NONE
-
-                        if (index == 3 && userRole.equals("Arrendatario", ignoreCase = true)) {
-                            return@SalvadorBottomBar
-                        }
-
                         destination = GuestDestination.entries[index]
                     }
                 )
