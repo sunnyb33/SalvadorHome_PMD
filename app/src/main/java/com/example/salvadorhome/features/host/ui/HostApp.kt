@@ -51,7 +51,7 @@ import com.example.salvadorhome.features.reservations.ui.MyReservationsScreen
 private enum class HostDestination { HOME, EXPLORE, MESSAGES, PUBLISH, BOOKINGS, PROFILE }
 
 @Composable
-fun HostApp() {
+fun HostApp(onLogout: () -> Unit = {}) {
     var destination by remember { mutableStateOf(HostDestination.HOME) }
     var selectedHosting by remember { mutableStateOf<Hosting?>(null) }
     var selectedConversation by remember { mutableStateOf<Conversation?>(null) }
@@ -174,7 +174,7 @@ fun HostApp() {
             )
 
             HostDestination.PROFILE -> ProfileScreen(
-                modifier = Modifier.padding(padding)
+                modifier = Modifier.padding(padding), onLogout = onLogout
             )
         }
     }

@@ -141,7 +141,16 @@ fun AppNavigation() {
         }
 
         composable(Routes.Host.route) {
-            HostApp()
+            HostApp(
+                onLogout = { // <-- LE DAMOS LA INSTRUCCIÓN A FIREBASE
+                    FirebaseAuth.getInstance().signOut()
+                    navController.navigate(Routes.Welcome.route) {
+                        popUpTo(0) {
+                            inclusive = true
+                        }
+                    }
+                }
+            )
         }
 
     }
