@@ -136,4 +136,21 @@ class ReservationViewModel(
         }
     }
 
+    fun cancelReservation(
+        reservationId: String,
+        onSuccess: () -> Unit
+    ) {
+        viewModelScope.launch {
+            val result = repository.cancelReservation(reservationId)
+
+            if (result.isSuccess) {
+                onSuccess()
+            } else {
+                _uiState.value = _uiState.value.copy(
+                    error = result.exceptionOrNull()?.message
+                )
+            }
+        }
+    }
+
 }

@@ -117,6 +117,15 @@ fun HostApp(onLogout: () -> Unit = {}) {
                 modifier = Modifier.padding(padding),
                 onEditClick = { hosting ->
                     editingHosting = hosting
+                },
+                onDeleteClick = { hosting ->
+                    hostingViewModel.deleteHosting(
+                        hostingId = hosting.id,
+                        onSuccess = {
+                            selectedHosting = null
+                            hostingViewModel.loadMyHostings()
+                        }
+                    )
                 }
             )
         } else if (selectedConversation != null) {
